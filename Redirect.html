@@ -1,0 +1,14 @@
+<script type="text/javascript">
+
+var protocol = location.protocol;
+var slashes = protocol.concat("//");
+var host = slashes.concat(window.location.hostname);
+
+if ((navigator.userAgent.match(/IEMobile/i)) ||(navigator.userAgent.match(/Android/i)) || (navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i)) ||(navigator.userAgent.match(/iPad/i))) {
+	var mobile = host.concat("/maps/m/Recreationatlas/index.html");
+   location.replace(mobile);
+} else {
+	var homepage = host.concat("/maps/Recreationatlas/Recreation.html");
+	location.replace(homepage);
+}
+</script>

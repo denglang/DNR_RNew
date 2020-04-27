@@ -1,0 +1,71 @@
+/*
+ *  tmpdir CheckBox Widgets CSS
+ *
+ *	Order of images in the sprite (from L to R):
+ *		checkbox	normal 	 - checked
+ *							 - unchecked
+ *							 - mixed
+ *					disabled - checked
+ *							 - unchecked
+ *							 - mixed
+ *					hover 	 - checked
+ *							 - unchecked
+ *							 - mixed
+*/
+.nihilo .tmpdirCheckBox,
+.nihilo .tmpdirCheckBoxIcon {
+	background-image: url('images/spriteCheckbox.gif'); /* checkbox sprite image */
+	background-repeat: no-repeat;
+	width: 16px;
+	height: 16px;
+	margin: 0;
+	padding: 0;
+}
+
+.nihilo .tmpdirCheckBox, 
+.nihilo .tmpdirCheckBoxIcon {
+	/* unchecked */
+	background-position: -16px;
+}
+
+.nihilo .tmpdirCheckBoxChecked, 
+.nihilo .tmpdirCheckBoxIcon {
+	/* checked */
+	background-position: 0px;
+}
+
+.nihilo .tmpdirCheckBoxDisabled {
+	/* disabled */
+	background-position: -48px;
+}
+
+.nihilo .tmpdirCheckBoxCheckedDisabled {
+	/* disabled but checked */
+	background-position: -48px;
+}
+
+.nihilo .tmpdirCheckBoxMixed {
+	/* checked & mixed */
+	background-position: -32px;
+}
+
+.nihilo .tmpdirCheckBoxMixedDisabled {
+	/* checked & mixed */
+	background-position: -64px;
+}
+
+.nihilo .tmpdirCheckBoxHover {
+	/* hovering over an unchecked enabled checkbox */
+	background-position: -112px;
+}
+
+.nihilo .tmpdirCheckBoxCheckedHover {
+	/* hovering over a checked enabled checkbox */
+	background-position: -96px;
+}
+
+.nihilo .tmpdirCheckBoxMixedHover {
+	/* checked & mixed */
+	background-position: -128px;
+}
+

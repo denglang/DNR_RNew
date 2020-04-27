@@ -1,0 +1,71 @@
+/*
+ *  tmpdir CheckBox Widgets CSS
+ *
+ *	Order of images in the sprite (from L to R):
+ *		checkbox	normal 	 - checked
+ *							 - unchecked
+ *							 - mixed
+ *					disabled - checked
+ *							 - unchecked
+ *							 - mixed
+ *					hover 	 - checked
+ *							 - unchecked
+ *							 - mixed
+*/
+.claro .tmpdirCheckBox,
+.claro .tmpdirCheckBoxIcon {
+	background-image: url('images/spriteCheckbox.gif'); /* checkbox sprite image */
+	background-repeat: no-repeat;
+	width: 16px;
+	height: 16px;
+	margin: 0;
+	padding: 0;
+}
+
+.claro .tmpdirCheckBox, 
+.claro .tmpdirCheckBoxIcon {
+	/* unchecked */
+	background-position: -16px;
+}
+
+.claro .tmpdirCheckBoxChecked, 
+.claro .tmpdirCheckBoxIcon {
+	/* checked */
+	background-position: 0px;
+}
+
+.claro .tmpdirCheckBoxDisabled {
+	/* disabled */
+	background-position: -48px;
+}
+
+.claro .tmpdirCheckBoxCheckedDisabled {
+	/* disabled but checked */
+	background-position: -48px;
+}
+
+.claro .tmpdirCheckBoxMixed {
+	/* checked & mixed */
+	background-position: -32px;
+}
+
+.claro .tmpdirCheckBoxMixedDisabled {
+	/* checked & mixed */
+	background-position: -64px;
+}
+
+.claro .tmpdirCheckBoxHover {
+	/* hovering over an unchecked enabled checkbox */
+	background-position: -112px;
+}
+
+.claro .tmpdirCheckBoxCheckedHover {
+	/* hovering over a checked enabled checkbox */
+	background-position: -96px;
+}
+
+.claro .tmpdirCheckBoxMixedHover {
+	/* checked & mixed */
+	background-position: -128px;
+}
+

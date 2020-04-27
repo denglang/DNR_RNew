@@ -1,0 +1,87 @@
+<style>
+	.tablesection{
+		font-weight: bold;
+		background-color:#CFCFCF;
+	}
+	td {
+		vertical-align:top;
+	}
+	.disclaimer{
+		font-size: 14px;
+	}
+    .helptext{
+		font-size: 14px;
+	}
+	p{
+		font-size: 14px;
+		margin-left: 23px; 
+		margin-top: 0px;
+		margin-bottom: 0px;
+	}
+	li{
+		font-size:1.2em; 
+	}
+	
+</style>
+<div data-dojo-type="dijit.layout.TabContainer" style="height:290px; padding:0 10px;width:600px;">
+<!--   PROGRAM DESCRIPTION -->
+       <div data-dojo-type="dijit.layout.ContentPane" data-dojo-props="title:'Disclaimer', selected:true">
+       <h2>Disclaimer</h2>
+       <div class="disclaimer">
+			This map service was developed to assist DNR field staff and emergency managers to quickly find areas for burial of large numbers of animals under disease conditions.   It does not take the place of existing rules and regulations.  Please contact your local DNR Field Office before burying livestock. 
+		<p></p>
+			<li>Field Office 1 - NE Iowa</li>
+			<p>909 W. Main Street, #4, Manchester, Iowa 52057</p>
+			<p>	P: 563-927-2640 </p>
+			<li>Field Office 2 - NC Iowa</li>
+			<P>2300 15th St. SW, Mason City, Iowa 50401 </P>
+			<p>P: 641-424-4073 </p>
+			<li>Field Office 3 - NW Iowa </li>
+			<p>1900 N. Grand Ave., Ste. E17, Spencer, Iowa 51301 </p>
+			<p>	P: 712-262-4177 </p>
+			<li>Field Office 4 - SW Iowa</li>
+			<p>	1401 Sunnyside Ln., Atlantic, Iowa 50022 </p>
+			<p>	P: 712-243-1934 </p>
+			<li>Field Office 5 - SC Iowa</li>
+			<p>	7900 Hickman Rd., Ste. 200, Windsor Heights, Iowa 50324 </p>
+			<p>	P: 515-725-0268 </p>
+			<li>Field office 6 - SE Iowa</li>
+			<p>	1023 W. Madison, Washington, Iowa 52353 </p>
+			<p>	P: 319-653-2135 </p>
+		
+       </div>
+       </div>
+       <div  data-dojo-type="dijit.layout.ContentPane" data-dojo-props="title:'Help', selected:false">
+       <h2>Map Help</h2>
+		<table class="helptext">
+			
+			<tr><td colspan="2" class="tablesection">Navigation</td></tr>
+			<tr><td width="150">Address search</td><td>Type an address in the address search box at the bottom of the
+					screen. A comma should separate each portion of the address. Example: 123 X St, Des Moines, IA, 50311</td></tr>
+			<tr><td>Facility ID search</td><td>Type 5-digit animal feeding operations Facility ID</td></tr>
+			<tr><td>PLSS search</td><td>Tier/Township Range Section search. Example: T84NR03E02</td></tr>
+			<tr><td>Zoom</td><td>Several options are available for zooming in and out on the map.</td></tr>
+			<tr><td>&nbsp;</td><td>use the +|- buttons on the map</td></tr>
+			<tr><td>&nbsp;</td><td>double-click on the map</td></tr>
+			<tr><td>&nbsp;</td><td>while holding down the shift key click and drag the mouse cursor on the map to zoom to an area</td></tr>
+			<tr><td>&nbsp;</td><td>use the + and - keys on the keyboard</td></tr>
+			<tr><td>&nbsp;</td><td>use the mouse scroll wheel</td></tr>			
+			<tr><td>Pan/Move Map</td><td>Several options are available for moving around in the map</td></tr>			
+			<tr><td>&nbsp;</td><td>click mouse and hold while dragging or</td></tr>
+			<tr><td>&nbsp;</td><td>use the arrow keys</td></tr>
+			
+			<tr><td colspan="2" class="tablesection">Map Tools</td></tr>
+			<tr><td>Locate Burial Site</td><td>Click on the map to place a marker where burial is proposed. Details will appear
+			 to the left of the map.</td></tr>
+			 <tr><td>Access AFO Facility Info</td><td>Center cursor arrow on an AFO facility. Links to Facility Explorer and
+					the AFO database will appear to the left of the map.</td></tr>
+			 <tr><td>Access Well Info</td><td>Center cursor arrow on a well and click to see links to additional
+					well information.</td></tr>
+			<tr><td>Measure</td><td>click on the measure tool (ruler) on the tool bar above the map.</td></tr>
+			<!--<tr><td>Mail AFO location</td><td>click on the mail button (envelope) on the tool bar above the map, this will fill the body of the mail message with URL than includes the location of the placed marker</td></tr>-->
+		</table>
+      </div>  
+</div>
+<button onclick="hideSplash()">
+       <b>I AGREE</b>
+</button>

@@ -1,0 +1,1094 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "https://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="IE=7,IE=9" http-equiv="X-UA-Compatible"/>
+<meta content="initial-scale=1, maximum-scale=1,user-scalable=no" name="viewport"/>
+<title>Iowa DNR - Recreation Atlas</title>
+<!--
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	 <script src="https://ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojo/dojo.js"></script> 
+ 
+		
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://domoritz.github.io/leaflet-locatecontrol/dist/L.Control.Locate.min.css" />
+	<script src="https://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+	<script src="https://domoritz.github.io/leaflet-locatecontrol/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+      
+	  <link rel="stylesheet" href="https://js.arcgis.com/3.17/esri/css/esri.css">  -->
+<link href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dijit/themes/nihilo/nihilo.css" rel="stylesheet"/>
+<link href="https://js.arcgis.com/3.5/js/esri/css/esri.css" rel="stylesheet"/>
+<link href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dojox/layout/resources/FloatingPane.css" rel="stylesheet" type="text/css"/>
+<link href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dojox/layout/resources/ExpandoPane.css" rel="stylesheet" type="text/css"/>
+<link href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dojox/grid/resources/Grid.css" rel="stylesheet" type="text/css"/>
+<link href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dojox/grid/resources/nihiloGrid.css" rel="stylesheet" type="text/css"/>
+<link href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/esri/dijit/css/bookmarks.css" rel="stylesheet"/>
+<link href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/esri/dijit/css/Popup.css" rel="stylesheet" type="text/css"/>
+<script src="https://programs.iowadnr.gov/maps/apis/proj4js/lib/proj4js-compressed.js" type="text/javascript"></script>
+<script src="https://programs.iowadnr.gov/maps/apis/proj4js/lib/defs/EPSG4326.js" type="text/javascript"></script>
+<script src="https://programs.iowadnr.gov/maps/apis/proj4js/lib/defs/EPSG102100.js" type="text/javascript"></script>
+<script src="https://programs.iowadnr.gov/maps/apis/proj4js/lib/defs/EPSG26915.js" type="text/javascript"></script>
+<script src="js/gov/iowadnr/compactmap/webmercatorbookmarks.js" type="text/javascript"></script>
+<script src="js/gov/iowadnr/compactmap/AGOLBasemaps.js" type="text/javascript"></script>
+<script src="js/gov/iowadnr/compactmap/dnrsymbols.js" type="text/javascript"></script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-40048805-1"></script>
+<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'UA-40048805-1');
+</script>
+
+<!--<script src="//sliver.iowa.gov/sliver.js" async defer></script> --> 
+
+<style> 
+     html, body { height: 100%; width: 100%; margin: 0; padding: 0; } 
+	  
+	  .toolContent{
+		margin-bottom:6px;
+		min-height:47px;  
+		max-height:65px;
+		background-color:silver;
+		text-align:center;
+		font-size:medium;
+		
+		}
+		.sidebarContent{
+		margin-bottom:3px;
+		min-height:80px;
+		background-color:silver;
+		text-align:center;
+		font-size:large;}
+      .sectitle { font-weight:bold;text-decoration: underline;}
+      .infotab {font-size: x-small;}
+		.nihilo .dojoxExpandoClosed {
+		width:27px !important;}
+		
+		 #LocateButton {
+		  position: absolute;
+		  top: 95px;
+		  left: 20px;
+		  z-index: 50;}
+		 #legendPane {
+			width: 200px !important;
+		 } 
+		 <!--display: none; -->
+    </style>
+<!--
+		 .dojoxExpandoWrapper {
+			visibility:hidden;
+		 }
+		 .dojoxExpandoPane dijitExpandoPane dojoxExpandoLeft dijitBorderContainerNoGutter-child dijitBorderContainerNoGutter-dijitExpandoPane dijitBorderContainerNoGutterPane dijitAlignLeft dojoxExpandoClosed{
+		  width: 150px !important; overflow: hidden !important; 
+		  top: 57px; position: absolute; height: 445px;} -->
+<script type="text/javascript">
+    
+        var djConfig = {
+          parseOnLoad: true,
+          packages: [{   
+		    "name": "agsjs",
+			//"location": "https://programs.iowadnr.gov/maps/apis/idnr/js/gov/iowadnr/compactmap/dijits/agsjs"
+            "location": location.pathname.replace(/\/[^/]+$/, '') + '/js/gov/iowadnr/compactmap/dijits/agsjs' 
+          }]
+        };
+    </script>
+<!--<script type="text/javascript" src="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5"></script>-->
+<script src="https://js.arcgis.com/3.9/" type="text/javascript"></script>
+<script src="https://programs.iowadnr.gov/maps/apis/esri/iowadnr/mapDijits/js/infotip.js" type="text/javascript"></script>
+<script type="text/javascript">
+      dojo.require("dijit.dijit");
+      dojo.require("esri.map");
+      dojo.require("esri.dijit.Scalebar");
+      dojo.require("esri.dijit.Popup");
+      dojo.require("esri.tasks.locator");
+      dojo.require("esri.tasks.find");
+	  dojo.require("esri.tasks.IdentifyTask");
+      dojo.require("dojo.number");
+      dojo.require("esri.layers.FeatureLayer");
+      dojo.require("esri.layers.agsdynamic");
+	  dojo.require("esri.dijit.LocateButton");
+      dojo.require("dijit.layout.BorderContainer");
+      dojo.require("dijit.layout.ContentPane");
+      dojo.require("dijit.TitlePane");
+      dojo.require("dijit.layout.AccordionContainer");
+      dojo.require("dojox.layout.ExpandoPane");
+      dojo.require("dojox.layout.FloatingPane"); 
+      dojo.require("dijit.layout.TabContainer");
+      dojo.require("esri.dijit.Bookmarks");
+      dojo.require("esri.dijit.BasemapGallery");
+      dojo.require("esri.dijit.Legend");
+      dojo.require("esri.dijit.Measurement");
+      dojo.require("esri.arcgis.utils");
+      dojo.require("dijit.Tooltip");
+      dojo.require("dijit.Dialog");
+      dojo.require("dijit.form.Button");
+      dojo.require("dijit.form.Slider");
+      dojo.require("dijit.form.Textarea");
+      dojo.require("dijit.form.CheckBox");
+      dojo.require("dijit.form.TextBox");
+      dojo.require("dijit.form.ValidationTextBox");
+      dojo.require("dijit.form.Select");
+      dojo.require("dijit.Menu");
+      dojo.require("dojox.grid.DataGrid");
+      dojo.require("dojo.data.ItemFileReadStore");
+      dojo.require("dijit.Tooltip");
+      dojo.require("dojo.fx.easing");
+      dojo.require("dojo.cookie");
+	  dojo.require("dojo.ready");
+      dojo.require("agsjs.dijit.TOC");
+     </script>
+<style type="text/css">
+         /*@import "https://programs.iowadnr.gov/maps/apis/idnr/js/gov/iowadnr/compactmap/css/dnrtheme.css";*/
+    	@import "js/gov/iowadnr/compactmap/css/dnrtheme.css";
+    </style>
+<script type="text/javascript">
+      var urlParams = dojo.queryToObject(window.location.search.slice(1));
+      var map = null;
+      var mapSpatialReferenceWKID = 102100;
+
+      var ActivityQueryParams,ActivityQueryTask;
+      var splash = false;
+      var hasScalebar = true;
+      var plssServiceUrl = "https://programs.iowadnr.gov/geospatial/rest/services/tools/plssLocator/MapServer";     
+	  var locatorServiceUrl = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";					 
+      var geometryServiceUrl = "https://programs.iowadnr.gov/geospatial/rest/services/Geometry/GeometryServer";
+      var RecreationServiceURL = "https://programs.iowadnr.gov/geospatial/rest/services/Recreation/Recreation/MapServer";
+      var LAYERSCONFIG = [
+                              {'title':'Notices and Alerts',
+                                     'serviceurl':'https://programs.iowadnr.gov/geospatial/rest/services/Recreation/Recreation/MapServer',
+                                      'id':'Recreation','options':{'opacity':'1'},'imageParameters':{'imageFormat':'png32'},'includedlayers':[0,1], 'initialvislayers':[0,1],'agsversion':'10.11'},
+                              {'title':'Recreation Layers',
+                                     'serviceurl':'https://programs.iowadnr.gov/geospatial/rest/services/Recreation/Recreation/MapServer',
+                                      'id':'Recreation','options':{'opacity':'1'},'imageParameters':{'imageFormat':'png32'},'includedlayers':[2,3,4,5,6,7,8], 'initialvislayers':[2,6,7,8],'agsversion':'10.11'},
+									
+                               {'title':'Public Lands',
+                                    'serviceurl':'https://programs.iowadnr.gov/geospatial/rest/services/Recreation/Recreation/MapServer',
+                                     'id':'Public Lands','options':{'opacity':'0.6'},'imageParameters':{'imageFormat':'png32'},'includedlayers':[9,10,11], 'initialvislayers':[10,11],'agsversion':'10.11'}       
+      					 ];
+      					 
+      var IDENTIFYCONFIG = [{"serviceurl":"https://programs.iowadnr.gov/geospatial/rest/services/Recreation/Recreation/MapServer",
+      						'identifylayers':[0,1,2,6,7,8,11],
+							"templatelayer0": { "title": "Recreation Alerts", "content": "<u><b>${Name}</u><br><br>${Type}</b><br><br>${description}" },
+							"templatelayer1": { "title": "Beach Status Alert", "content": "State Beach Swimming Alert<br><br><u><b>${BEACHNAME}</u></b><br><br>${STATUS}<br><br><a href='https://www.igsb.uiowa.edu/wqm/Beaches/BeachMapState.htm' target='_blank'>More Information</a>" },
+      						"templatelayer8": { "title": "Recreation Amenity", "content": "Recreation Amenity<br><br><u/><b/>${Type}</u></b><br><br>UTM X: ${UTM_X}<br>UTM Y: ${UTM_Y}"},
+							"templatelayer7": { "title": "Trail", "content": "Trail<br><br><u><b>${Name}</u></b><br>Type: ${Type}<br>Uses: ${Rec_uses}<br>${Length_m} Miles" },
+							"templatelayer2": { "title": "Trout Streams", "content": "Trout Stream<br><br><u><b>${NAME}</u></b><br>${TYPE}, ${SR_INFO}<br>Stocked with ${STOCK_CATC} Trout<br><br><a href='${More_Info}' target='_blank'>More Info</a>" },
+							"templatelayer6": { "title": "Paddling", "content": "Paddling Routes<br><br><u/><b/>${Name}</u></b><br>${Length_m} Miles<br><br><a href='https://www.iowadnr.gov/Recreation/CanoeingKayaking/WaterTrails/WaterTrailMapsBrochures.aspx' target='_blank'>More Info</a>" },
+//      						"templatelayer9": { "title": "Hunting Area", "content": "Hunting Area<br><br><u><b>${AREA_NAME}</b></u><br><a href='${More_Info}' target='_blank'>More Info</a><br>More Detailed Info at the <a href='https://programs.iowadnr.gov/maps/huntingatlas/' target='_blank'>Hunting Atlas</a>" },
+      						"templatelayer11": { "title": "Public Area", "content": "Public Area<br><br><u><b>${Name}</u></b><br>Managed by ${Manager}<br>in ${COUNTY} County<br><br><a href='${More_Info}' target='_blank'>More Info</a><br><br/>" },
+
+							},
+      					    ];     
+   
+      //END SET OPTIONS
+      var activitylist =  [
+			{label: "Biking-Mountain",value: "mountainBiking"},
+			{label: "Biking-Paved Trail" ,value: "pavedBikeTrail"},
+			{label: "Camping",value: "camping"},
+			{label: "Cross-country Skiing",value: "xcSkiing"},
+			{label: "Fishing" ,value: "fishing"},
+			{label: "Fishing-Ice",value: "iceFishing"},
+			{label: "Frisbee/Disc Golf",value: "discgolf"},
+			{label: "Geocaching",value: "geocaching"},
+			{label: "Golf",value: "golf"},
+			{label: "Hiking",value: "hiking"},
+			{label: "Horseback Riding" ,value: "horsebackRiding"},
+			{label: "Horseshoes",value: "horseshoe"},
+			{label: "Hunting",value: "hunting"},
+			{label: "Ice Skating",value: "iceSkating"},
+			{label: "Interpretive Programs",value: "interpretiveprograms"},
+			{label: "Interpretive Trail",value: "interpretiveTrail"},
+			{label: "Paddle Boating",value: "paddleBoating"},
+			{label: "Paddling",value: "paddling"},
+			{label: "Picnicking",value: "picnic"},
+			{label: "Playground",value: "playground"},
+			{label: "Rock Climbing" ,value: "rockClimbing"},
+			{label: "Running" ,value: "running"},
+			{label: "Sailing",value: "sailing"},
+			{label: "Shooting Sports",value: "shootingSports"},
+			{label: "Sledding",value: "sledding"},
+			{label: "Swimming" ,value: "swimming"},
+			{label: "Trapping",value: "trapping"},
+			{label: "Walking",value: "walking"},
+			{label: "Water Skiing",value: "waterski"},
+			{label: "Wildlife Viewing",value: "wildlifeViewing"},
+			{label: "Windsurfing",value: "windsurfing"}
+			];
+      
+      var zoompt;
+      var zoom;
+      var default_basemap="bmGray"; //bmRoads bmAerial bmHybrid bmGray bmTopo bmOSM
+      var basemap_gallery,legend;
+      var locator,identifyDijit,measureDijit;
+      var selectionHandler, clickHandler,clickListener;
+      var initialExtent;
+      var showcoordinates = true;
+      var maplayers = [];
+   
+      var findParams, plssFindTask;  
+      var dnrsymbols, defaultPinColor;
+      
+      var iTip,infoTemplate; 
+	  var query = false;
+     
+     function init() {
+    	dnrsymbols = new DNRSymbols();
+      	defaultPinColor = dnrsymbols.bluePin;
+        var mapSpatialReference = new esri.SpatialReference({"wkid":mapSpatialReferenceWKID});
+      	esri.config.defaults.geometryService = new esri.tasks.GeometryService(geometryServiceUrl);
+      	
+      	if (splash){
+	      dijit.byId("splash").show();
+	    };
+	   
+      	var toclayers = [];
+      	var legendlayers = [];
+      	
+      	zoom = getDefaultZoom();
+	    if (urlParams['loc'] || urlParams['trs']){
+			 zoompt,zoom,default_basemap,trs = getURLParamValues(urlParams);
+		}
+		initRecreationList(activitylist);
+		initPlssSearchParams(plssServiceUrl,mapSpatialReference);
+		
+		initRecAreaSearchParams(RecreationServiceURL,mapSpatialReference,[11],["NameUnit"]);
+        initActivitySearchParams(RecreationServiceURL,mapSpatialReference,12);
+        
+        for (lyr in LAYERSCONFIG) {
+	      	lyr_info = LAYERSCONFIG[lyr];
+	      	newlyr = new esri.layers.ArcGISDynamicMapServiceLayer(lyr_info.serviceurl, lyr_info.options);
+	      	if (lyr_info.initialvislayers){
+	      		newlyr.setVisibleLayers(lyr_info.initialvislayers);
+	      	}
+	      	maplayers.push(newlyr);
+	        toclayers.push({'layer':maplayers[lyr],'title':lyr_info.title,'includedLayers':lyr_info.includedlayers, 
+			'initialvislayers':lyr_info.initialvislayers,'version':lyr_info.agsversion});
+       		legendlayers.push({'layer': maplayers[lyr],'title':lyr_info.title});
+       };        
+		
+	      switch (mapSpatialReferenceWKID){
+	      case 26915:
+			  initialExtent = new esri.geometry.Extent(
+				  {"spatialReference": {"wkid": mapSpatialReferenceWKID},
+					"xmin": -178239.785844676,
+					"ymin": 4359298.01712914,
+					"xmax": 1117162.80496051,
+					"ymax": 4933974.16648144});
+			  initialExtent.spatialReference.wkid = mapSpatialReferenceWKID;
+	      	   //lods = [{"level":0,"resolution":2116.67090000847,"scale":8000000},{"level":1,"resolution":1058.33545000423,"scale":4000000},{"level":2,"resolution":529.167725002117,"scale":2000000},{"level":3,"resolution":264.583862501058,"scale":1000000},{"level":4,"resolution":132.291931250529,"scale":500000},{"level":5,"resolution":66.1459656252646,"scale":250000},{"level":6,"resolution":33.0729828126323,"scale":125000},{"level":7,"resolution":16.9333672000677,"scale":64000},{"level":8,"resolution":8.46668360003387,"scale":32000},{"level":9,"resolution":4.23334180001693,"scale":16000},{"level":10,"resolution":2.11667090000847,"scale":8000},{"level":11,"resolution":1.05833545000423,"scale":4000},{"level":12,"resolution":0.529167725002117,"scale":2000}];	
+	      	   break;
+	      case 102100:
+	              initialExtent = new esri.geometry.Extent({"xmin":-11046697,"ymin":4659284,"xmax":-9788237,"ymax":5602211,"spatialReference":{"wkid":102100}});
+				  break;
+	      	}
+	        	
+
+	      var popup = new esri.dijit.Popup({
+          	fillSymbol: dnrsymbols.polygonSymbol,
+            lineSymbol: dnrsymbols.lineSymbol,
+            markerSymbol: dnrsymbols.markerSymbol
+            }, dojo.create("div",{id:'infopop'}));
+	      
+	       map = new esri.Map("map", {
+	          extent: initialExtent,
+			  //zoom: 8,
+	          spatialReference: new esri.SpatialReference({"wkid":mapSpatialReferenceWKID})
+	          ,infoWindow: popup
+	        });
+	        
+	       geolocate = new esri.dijit.LocateButton({
+		   map:map
+		   },"LocateButton");
+		   geolocate.startup();
+		   
+		
+		createTOC(toclayers);
+        
+		dojo.connect(map, "onLoad", function() { 
+ 	     	  clickListener = identifyFeatures;	    
+        	 });
+        	 	        
+	        //After Layers Added create, Legend,TOC and Measurement Tools
+	        dojo.connect(map, 'onLayersAddResult', function(results) {
+					//createTOC(toclayers);
+	             createLegend(legendlayers);
+	             addMeasurementWidget();
+	             initIdentify(IDENTIFYCONFIG);
+	             createBookmarks();          
+	             addMailMapButton();
+	             addSplashButton();
+	             
+	             dojo.connect(map, "onMouseMove", showCoordinates);
+	             dojo.connect(map, "onMouseDrag", showCoordinates);
+	       });        	
+	       
+	       createBasemapGallery(default_basemap); 
+		   
+	       iTip = new infoTip("iTipDiv", "infoTip roundcorner black", map.position, true); //this will deactivate the hover function
+		   //when move mouse over a feature, which is not supported on touchscreen
+	       
+	       
+	       if (hasScalebar){
+	       	  var scalebar = new esri.dijit.Scalebar({
+			  map:map,
+			  attachTo:"bottom-right"
+			  });
+	       }    
+
+
+		  locator = new esri.tasks.Locator(locatorServiceUrl);
+	      dojo.connect(locator, "onAddressToLocationsComplete", showGeocodeResults);
+			
+          //Address Search Button
+	      dojo.connect(dojo.byId('search-address'),'onclick',function(){
+      			locateAddress();
+    	  });
+    	  //Address Search, Enter Key
+    	  dojo.connect(dojo.byId('address'),'onkeydown',function(e) {
+        		if(e.keyCode === 13){
+      			locateAddress();
+    	  }});
+    	  
+    	  //PLSS Search event/find task
+		  dojo.connect(dojo.byId('search-plss'),'onclick',function(){
+      			locatePLSS();
+    	  });
+    	  
+		  dojo.connect(dojo.byId('plss'),'onkeydown',function(e) {
+			if(e.keyCode === 13){
+			locatePLSS();
+    	  }});
+    	  
+    	 dojo.connect(dojo.byId('search-RecArea-button'),'onclick',function(){
+            locateRecArea();
+         });
+		//Resend Query on map extent change, useful when >500 records returned.
+		dojo.connect(map,"onExtentChange", function(){
+	  	if (query){
+	  		doActivitySearch(searchfield,searchtext);
+	  	}
+	  });
+          
+         initHideShowTabListener();
+         clickListener = identifyFeatures;
+         dojo.connect(dijit.byId('map'),'resize',map,map.resize);	
+     }
+     
+     function initHideShowTabListener(){
+     	tabsVisible = true;
+     	dojo.connect(dijit.byId('leftPane'),'toggle',function(e){
+     		     	//alert('ok');
+     		if (tabsVisible){
+     			dojo.query("#tabContainer").style('display','none');
+            	tabsVisible = false;
+     		}else{
+     			dojo.query("#tabContainer").style('display','block');
+            	tabsVisible = true;
+     		}
+     	});
+     };
+      function getDefaultZoom(){
+     	if (window.innerWidth < 780){
+	      		zoom = 4;
+	      	} else if (window.innerWidth >= 780 && window.innerWidth < 1280){
+	      		zoom = 5;
+	      	}else if (window.innerWidth >= 1280){
+	      		zoom = 6;
+	      	}
+	     return zoom;
+     }
+      function getURLParamValues(urlParams){
+       	  xy = urlParams['loc'].split(",");
+       	  trs = urlParams['trs'];
+       	  if(urlParams['b']){
+       	  	 default_basemap = urlParams['b'];
+       	  }else{
+       	  	default_basemap = "bmRoads";
+       	  }      	  
+		  if (urlParams['z'])
+			  {
+			  	zoom = urlParams['z'];
+			  }else{
+			  	zoom = 5;
+			  }
+		  if ( xy[0] > -180 && xy[0]< 180 && xy[1] > 0 && xy[1]< 90  ){
+		  	tpt = transformCoordinate('EPSG:4326','EPSG:26915',xy[0],xy[1]);
+		  	zoompt = new esri.geometry.Point(tpt.x,tpt.y,new esri.SpatialReference({ wkid:26915 }));
+		  }else if (xy[0] > 150000 && xy[0]< 790000 && xy[1] > 4400000 && xy[1]< 4900000){
+		  	zoompt = new esri.geometry.Point(xy[0],xy[1],new esri.SpatialReference({ wkid:26915 }));
+		  }else{
+		  	console.error("coordinates not recognized");
+		  }
+		  return zoompt,zoom,default_basemap,trs;
+      };
+      
+      function createLegend(legendlayers){
+      	legend = new esri.dijit.Legend(
+      		{
+	  			map:map
+	  		    ,layerInfos: legendlayers.reverse()
+	  		},
+	  			"legendDiv"
+  			);
+			legend.startup();	
+      };
+   	  
+   	  function createTOC(toclayers){
+      	mapTOC = new agsjs.dijit.TOC(
+        	{
+	            map: map,
+	            layerInfos: toclayers
+	                    },
+	             "tocDiv");
+	    mapTOC.startup();
+	    dojo.connect(mapTOC, 'onLoad', function(){
+	    	     hideTOCLayers(toclayers);
+				 }); 
+       }
+      
+      function hideTOCLayers(toclayers){
+      	for (i in toclayers){				
+      		 for (j in toclayers[i].layer.layerInfos){
+      		 	 if (toclayers[i].includedLayers.indexOf(parseInt(j)) == -1){
+      		 	 		mapTOC.findTOCNode(toclayers[i].layer,j).hide();
+      		 	 }
+      		 } 
+      	}
+      }
+      
+      function initPlssSearchParams(plssServiceUrl, mapSpatialReference){
+      	plssFindTask = new esri.tasks.FindTask(plssServiceUrl);
+      	findParams = new esri.tasks.FindParameters();
+      	//findParams.outSpatialReference = new esri.SpatialReference({"wkid":mapSpatialReference});
+		findParams.outSpatialReference = mapSpatialReference;
+		findParams.returnGeometry = true;
+		findParams.layerIds = [1];
+		findParams.searchFields = ["TRSQQQ"];
+      };
+      function locatePLSS() {
+        findParams.searchText = dojo.byId("plss").value;
+        if (findParams.searchText){
+        	plssFindTask.execute(findParams, showPlssResults, noPlssResults);
+        } else {
+        	map.graphics.clear();
+        }
+      }
+      function noPlssResults(error){
+      	map.graphics.clear();
+      	alert("Please enter a valid Township, Range and Section");
+      };
+      function showPlssResults(results){
+      	if (results.length>0){
+	      	map.graphics.clear(); 
+	        dojo.forEach(results, function(result) {
+	          var graphic = result.feature;
+	          switch (graphic.geometry.type) {
+	          case "point":
+	            graphic.setSymbol(dnrsymbols.markerSymbol);
+	            break;
+	          case "polyline":
+	            graphic.setSymbol(dnrsymbols.lineSymbol);
+	            break;
+	          case "polygon":
+	            graphic.setSymbol(dnrsymbols.polygonSymbol);
+	            break;
+	          }
+	
+	          map.graphics.add(graphic);
+	        });
+	         map.setExtent(esri.graphicsExtent(map.graphics.graphics).expand(1.5));
+       }else{
+       	alert("No location found");
+       };
+      };
+
+	  function initRecAreaSearchParams(serviceUrl,outSRS, layerIds, searchFields){
+			RecAreaFindTask = new esri.tasks.FindTask(serviceUrl);
+			RecAreaFindParams = new esri.tasks.FindParameters();
+			RecAreaFindParams.returnGeometry = true;
+			RecAreaFindParams.outSpatialReference = outSRS;
+			RecAreaFindParams.layerIds = layerIds;
+			RecAreaFindParams.searchFields = searchFields;
+		};
+	
+	 function initActivitySearchParams(serviceUrl,outSRS,layerId)
+	 {
+	 	ActivityQueryTask = new esri.tasks.QueryTask(serviceUrl + "/" + layerId);
+	 	ActivityQueryParams = new esri.tasks.Query();
+	 	ActivityQueryParams.returnGeometry = true;
+	 	ActivityQueryParams.outSpatialReference = outSRS;
+	 	ActivityQueryParams.layers
+	 	
+	 }
+	 
+		function doActivitySearch(searchField,searchText) {
+      	ActivityQueryParams.text = "%";
+      	ActivityQueryParams.outFields = ["*"];
+      	ActivityQueryParams.geometry = map.extent;
+		ActivityQueryParams.where = searchField + "= '"+searchText+"'" ;
+        ActivityQueryTask.execute(ActivityQueryParams, searchComplete);
+        query = true;
+      }
+	 
+	  function locateRecArea() {
+			RecAreaFindParams.searchText = dojo.byId('search-RecArea-text').value;
+			if (RecAreaFindParams.searchText)
+			{
+				RecAreaFindTask.execute(RecAreaFindParams, showRecAreaNameResults, noAreaResults);
+			} else {
+				map.graphics.clear();
+			}
+		};
+
+	  function showRecAreaNameResults(results){
+		   if (results.length>0){
+	             map.graphics.clear();
+				 query=false;
+	          var items = dojo.map(results,function(result){
+		          var graphic = result.feature;
+				   icon = dnrsymbols.markerSymbol;
+		           graphic.setSymbol(icon);
+		           map.graphics.add(graphic);
+		          return result.feature.attributes;
+	          });	          
+		        var griddata = {
+					items: items
+				};
+	      	    store = new dojo.data.ItemFileReadStore({ data:griddata });
+	      	    var layout = [[
+				      {'name': 'Name', 'field': 'Name', 'width': '150px'},
+				      {'name': 'County', 'field': 'COUNTY', 'width':'60px'},
+				    ]]; 
+	      	    
+	      	  if (!dijit.byId("area-grid")){
+	      	    grid = new dojox.grid.DataGrid({
+			        id: 'area-grid',
+			        store: store,
+			        structure: layout,
+			        sortInfo: '1'
+			        },
+			        document.createElement('div'));
+		        	dojo.byId("search-results").appendChild(grid.domNode);
+		        	grid.startup();
+	        	} else {
+	        		grid = dijit.byId("area-grid");
+	        		grid.setStore(store);      	 
+	        	}
+         
+	           if (map.graphics.graphics.length > 1){
+	           		map.setExtent(esri.graphicsExtent(map.graphics.graphics).expand(2));
+	           }else{
+					map.centerAndZoom(map.graphics.graphics[0].geometry, 14);	           	
+	           	
+	           }
+	           dojo.connect(grid, "onRowClick", onRowClickHandler);
+
+  		 	} 
+		 };	
+	
+	  function searchComplete(results){
+	  		if(results.features.length==500){
+	  			alert("More than 500 results, zoom in for more detail");
+	  		}
+		   	if (results.features.length>0){
+	            map.graphics.clear();
+				for(var i = 0, il = results.features.length; i < il; i++) {
+					// get current feature
+					var graphic = results.features[i];
+					var recreationlist = generateRecreationListText(results.features[i].attributes);
+					graphic.setSymbol(defaultPinColor);
+				    var infoTemplate = new esri.InfoTemplate();
+				    infoTemplate.setContent("<span><b/><u/>${NameUnit}</b></u></span><br/>Managed by ${MANAGER}<br/>In ${COUNTY} County <br/><br/><b/><u/>Activities</u></b><br/>" + recreationlist + "</span>");
+					graphic.setInfoTemplate(infoTemplate);
+					map.graphics.add(graphic);
+				}
+				if (!query){
+			     if (map.graphics.graphics.length > 1){
+		           		map.setExtent(esri.graphicsExtent(map.graphics.graphics).expand(2));
+		         }else{
+						map.centerAndZoom(map.graphics.graphics[0].geometry, 14);	           	
+		           }}	
+  		 	 
+  		 	 setUpMouseEvents();
+  		 	 
+  		 	} else {map.graphics.clear();}
+		 };
+
+        function setUpMouseEvents() {
+			dojo.connect(map.graphics, "onMouseOver", function(evt) {
+				origSymbol = defaultPinColor;
+				switch (evt.graphic.geometry.type) {
+					case "point":
+						evt.graphic.setSymbol(dnrsymbols.redPin);
+						break;
+					default:
+						evt.graphic.setSymbol(dnrsymbols.redPin);
+					//case "polyline":
+						//var biggerWidth = evt.graphic.symbol.width + 4;
+						//evt.graphic.setSymbol(dojo.clone(evt.graphic.symbol).setWidth(biggerWidth).setColor([r, g, b, a]));
+						break;
+				}
+				iTip.setContent(evt.graphic.getContent());
+				iTip.show(evt.screenPoint, map.height, map.width);
+			});
+			dojo.connect(map.graphics, "onMouseOut", function(evt) {
+				evt.graphic.setSymbol(origSymbol);
+				iTip.hide();
+			});
+			}
+
+		function generateRecreationListText(attributelist){
+			//This is the recreation text that gets put into the infowindow. "biking,hiking"
+			var recreationactivities='';				
+			activitymapping = {
+				pavedBikeTrail:"biking",
+				fishing:"fishing",
+				hiking:"hiking",
+				running:"running",
+				paddling:"paddling",
+				sailing:"sailing",
+				waterski:"waterski",
+				discgolf:"frisbee or disc golf",
+				horseshoe:"horseshoes",
+				wildlifeViewing:"wildlife viewing",
+				playground:"playground",
+				rockClimbing:"rock climbing",
+				swimming:"swimming",
+				horsebackRiding:"horseback riding",
+				mountainBiking:"mountain biking",
+				shootingSports:"shooting sports",
+				golf:"golf",
+				camping:"camping",
+				walking:"walking",
+				geocaching:"geocaching",
+				picnic:"picnicking",
+				windsurfing:"wind surfing",
+				interpretiveprograms:"nature or interpretive programs",
+				iceFishing:"ice fishing",
+				sledding:"sledding",
+				hunting:"hunting",
+				iceSkating:"ice skating",
+				trapping:"trapping",
+				xcSkiing:"cross-country skiing",
+				paddleBoating:"paddle boating",
+				interpretiveTrail:"interpretive trail"};
+		
+		for (var k in attributelist){
+			if (attributelist[k]==="1"){
+				recreationactivities += activitymapping[k] + ", ";
+			}
+		}
+		//Get rid of the trailing comma
+		recreationactivities = recreationactivities.slice(0,-2);
+		console.log(recreationactivities);
+		return recreationactivities;
+		}	 
+
+    function noAreaResults(error){
+			map.graphics.clear();
+			alert("Please enter a valid search");
+		};
+    function onRowClickHandler(evt){
+		var clickedFeatureRow = grid.getItem(evt.rowIndex);
+		var selectedFeature;
+		dojo.forEach(map.graphics.graphics, function(graphic){
+			if ((graphic.attributes) && graphic.attributes === clickedFeatureRow) {
+				selectedFeature = graphic;
+				return;
+			}
+		});
+		if (selectedFeature.geometry.type == 'point') {
+			map.centerAndZoom(selectedFeature.geometry, 14);
+		}
+		else {
+			map.setExtent(selectedFeature.geometry.getExtent().expand(5));
+		}
+	}
+		
+
+    function initIdentify(IDENTIFYCONFIG){
+      	identifyconfiguration = IDENTIFYCONFIG[0];
+        identifyTask = new esri.tasks.IdentifyTask(identifyconfiguration.serviceurl);
+        identifyParams = new esri.tasks.IdentifyParameters();
+        identifyParams.tolerance = 5;
+        identifyParams.spatialReference = new esri.SpatialReference({"wkid":mapSpatialReferenceWKID});
+        identifyParams.returnGeometry = true;
+        identifyParams.layerIds = identifyconfiguration.identifylayers;
+        identifyParams.layerOption = esri.tasks.IdentifyParameters.LAYER_OPTION_ALL;
+        identifyParams.width  = map.width;
+        identifyParams.height = map.height;
+        clickHandler = dojo.connect(map, "onClick", identifyFeatures);
+      }
+      
+    //TODO: Put this in with config part
+    function identifyFeatures(evt) {
+      	identifyconfiguration = IDENTIFYCONFIG[0];
+        identifyParams.geometry = evt.mapPoint;
+        identifyParams.mapExtent = map.extent;
+       
+        var deferred = identifyTask.execute(identifyParams);
+        deferred.addCallback(function(response) {    
+          return dojo.map(response, function(result) {
+            var feature = result.feature;
+            feature.attributes.layerName = result.layerName;
+            template = new esri.InfoTemplate(identifyconfiguration["templatelayer" + result.layerId]);
+            feature.setInfoTemplate(template);
+            return feature;
+          });
+        });
+        map.infoWindow.setFeatures([ deferred ]);
+        map.infoWindow.show(evt.mapPoint);
+      }
+      
+      function showCoordinates(evt) {
+        var mp = evt.mapPoint;
+        pt01 = transformCoordinate('EPSG:102100','EPSG:26915',mp.x,mp.y);
+        pt02 = transformCoordinate('EPSG:102100','EPSG:4326',mp.x,mp.y);
+        dojo.byId("divMapCoords").innerHTML = pt01.x.toFixed(2) + ", " + pt01.y.toFixed(2);
+        dojo.byId("divTransformedCoords").innerHTML = pt02.x.toFixed(6) + ", " + pt02.y.toFixed(6);
+      }
+      function transformCoordinate(fromEPSG, toEPSG, x ,y){
+      	var source = new Proj4js.Proj(fromEPSG);    //source coordinates will be in Longitude/Latitude
+		var dest = new Proj4js.Proj(toEPSG);     //destination coordinates in LCC, south of France
+		var p = new Proj4js.Point(x,y);   //any object will do as long as it has 'x' and 'y' properties
+		return Proj4js.transform(source, dest, p);      //do the transformation.  x and y are modified in place
+      }
+      function locateAddress() {
+      	map.graphics.clear();
+        var address = {"SingleLine":dojo.byId("address").value};
+        locator.outSpatialReference= map.spatialReference;
+        locator.addressToLocations(address,["Loc_name"]);
+      }
+      function showGeocodeResults(candidates) {
+        var candidate;
+        var infoTemplate = new esri.InfoTemplate("Location", "Address: ${address}<br />Score: ${score}<br />Source locator: ${locatorName}");
+        var geom;
+       
+        dojo.every(candidates,function(candidate){
+          if (candidate.score > 80) {
+            var attributes = { address: candidate.address, score:candidate.score, locatorName:candidate.attributes.Loc_name };  
+            geom = candidate.location;
+
+            var graphic = new esri.Graphic(geom, redPin, attributes, infoTemplate);
+            map.graphics.add(graphic);
+            return false; //break out of loop after one candidate with score greater  than 80 is found.
+          }
+        });
+        if(geom !== undefined){
+          map.centerAndZoom(geom,14);
+        }
+      }       	
+   	  function addMeasurementWidget() {
+	   var fp = new dojox.layout.FloatingPane({
+	     title:"Measure",
+	     resizable: false,
+	     dockable: false,
+	     closable: false,
+	     style: "position:absolute;top:5px;left:5px;width:245px;height:175px;z-index:100;visibility:hidden;",
+	     id: 'measurePane'
+	   }, dojo.byId('measurePane'));
+	   fp.startup();
+	
+	   var titlePane = dojo.query('#measurePane .dojoxFloatingPaneTitle')[0];
+	   //add close button to title pane
+	   var closeDiv = dojo.create('div', {
+	     id: "closeBtn",
+	     innerHTML:  esri.substitute({close_title:"close",close_alt:"close"},'<a alt=${close_alt} title=${close_title} href="JavaScript:toggleMeasure();"><img  src="https://programs.iowadnr.gov/maps/apis/idnr/js/gov/iowadnr/compactmap/images/close.png"/></a>')
+	   }, titlePane);
+	
+	   measure = new esri.dijit.Measurement({
+	     map: map,
+	     id: 'measureTool'
+	   }, 'measurementDiv');
+	
+	   measure.startup();
+	   var measureButton = new dijit.form.ToggleButton({
+	     label: "Measure",
+	     title: "Measure", 
+	     id: "measureButton",
+	     iconClass: "esriMeasureIcon",
+	     baseClass: "dnrToolButton"
+	   });
+	   dojo.connect(measureButton, "onClick", function () {
+	     toggleMeasure();
+	   });
+	
+	   dojo.byId('header-toolbar').appendChild(measureButton.domNode);
+	 }
+  
+     function addMailMapButton(){
+  		 var mailButton = new dijit.form.ToggleButton({
+	     label: "Send Map",
+	     title: "Mail", 
+	     id: "mailButton",
+	     iconClass: "dnrMailIcon",
+	     baseClass: "dnrToolButton"
+	    });
+	
+	   dojo.connect(mailButton, "onClick", function () {
+	     toggleMail();
+	   });
+	
+	   dojo.byId('header-toolbar').appendChild(mailButton.domNode);
+    }
+     function addSplashButton(){
+  		var splashButton = new dijit.form.ToggleButton({
+	     label: "Map Info",
+	     title: "Map Info", 
+	     id: "showsplash",
+	     iconClass: "dnrSplashIcon",
+	     baseClass: "dnrToolButton"
+	    });
+	   dojo.connect(splashButton, "onClick", function () {
+	     showSplash();
+	   });	
+	   dojo.byId('header-toolbar').appendChild(splashButton.domNode);	
+    }
+      function clearMapResults(){
+ 		map.graphics.clear();
+ 		query=false;
+ 			        var griddata = {
+					items: null
+				};
+	      	    store = new dojo.data.ItemFileReadStore({ data:griddata });
+	      	    	grid = dijit.byId("area-grid");
+	        		grid.setStore(store);
+ 	}  
+  function initCustomSearchButton(){
+        
+	          //Button in map toolbar
+	          var RecreationSearchButton = new dijit.form.ToggleButton({
+	            label: "Recreation Search",
+	            id: "Recreationsearch_toolbutton",
+	            iconClass: "dnrMapIconSearch",
+	            baseClass: "dnrToolButton"
+	          });
+	          dojo.connect(RecreationSearchButton, "onClick", function () {
+	            map.graphics.clear();
+	          });
+	          dojo.byId('header-toolbar').appendChild(RecreationSearchButton.domNode);
+
+  }
+  
+  	function initSearcTab(){
+  } 
+  
+  	function toggleSearch() {
+	   if (dojo.byId('search-pane').style.visibility === 'hidden') {
+	       dijit.byId('search-pane').show();
+	       map.graphics.clear();
+	   } else {
+	     dijit.byId('search-pane').hide();
+	     enablePopups();
+	     map.graphics.clear();
+	     griddata = {items:[]};
+	     store = new dojo.data.ItemFileReadStore({ data:griddata });
+	     grid = dijit.byId("area-grid");
+	     grid.setStore(store);   
+	     dijit.byId('search-pane').set('checked', false);
+	   }
+	}
+
+
+    function initRecreationList(activitylist){
+       dojo.forEach(activitylist,function(item){
+       	dijit.byId("recreationMenu").addChild(new dijit.MenuItem({
+            label: item.label,
+            onClick: dojo.hitch(this, function() {
+              doActivitySearch(item.value,"1");
+              searchfield = item.value;
+              searchtext = "1";
+            })
+          })); 
+       });
+	 }
+  
+  function toggleMail(){
+  	baseurl = "https://" + window.location.hostname +":" +window.location.port + window.location.pathname;  	
+    tpt = transformCoordinate('EPSG:26915','EPSG:4326',map.extent.getCenter().x,map.extent.getCenter().y);
+  	loc = tpt.x.toFixed(6) +"," + tpt.y.toFixed(6);
+  	zoom = map.getLevel();
+  	selected_basemap = basemap_gallery.getSelected().id;
+  	baseurl += "%3Floc=" + loc;
+  	baseurl += "%26z=" + zoom;
+  	baseurl += "%26b=" + selected_basemap;
+  	window.location = "mailto:?subject=An Iowa DNR Map you might like&body=" + baseurl;
+  }
+  
+  function createBasemapGallery(default_basemap){
+      basemap_gallery = createWebMercatorGallery();
+	  
+      //basemap_gallery.startup();
+      selectionHandler = dojo.connect(basemap_gallery,"onSelectionChange",function(){
+          		dojo.disconnect(selectionHandler);
+          		map.addLayers(maplayers.reverse());
+      });
+      
+      //FORCE selectionChange to add layers, API throws an error since we are using all Bing Maps otherwise. 
+      //dijit.byId(basemap_gallery.id).onSelectionChange();
+
+   }
+	function showSplash(){
+		dijit.byId('splash').show();
+	}
+	function hideSplash() {
+		dijit.byId('splash').hide();
+	}
+    function enablePopups() {
+              if (clickListener) {
+                     clickHandler = dojo.connect(map, "onClick", clickListener);
+              }
+     }
+   function disablePopups() {
+      if (clickHandler) {
+        dojo.disconnect(clickHandler);
+      }
+   }
+ function toggleMeasure() {
+   if (dojo.byId('measurePane').style.visibility === 'hidden') {
+     dijit.byId('measurePane').show();
+     disablePopups();
+     map.hideZoomSlider();
+   } else {
+     dijit.byId('measurePane').hide();
+     enablePopups();
+     map.showZoomSlider();
+     dijit.byId('measureButton').set('checked', false);
+     var measure = dijit.byId('measureTool');
+     measure.clearResult();
+     if (measure.activeTool) {
+       measure.setTool(measure.activeTool, false);
+     }
+   }
+ }
+function sortAscending(property) {
+	return function (a,b) {
+	return (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+	}
+}
+function sortDescending(property) {
+	return function (a,b) {
+	return (a[property] > b[property]) ? -1 : (a[property] < b[property]) ? 1 : 0;
+	}
+}	
+
+//L.control.locate(
+//	{
+//	 follow:true,
+//	 locateOptions: {enableHighAccuracy:true}
+//	}).addTo(map);
+	
+ dojo.addOnLoad(init);
+    </script>
+</head>
+<body class="nihilo">
+<div class="dijitHidden">
+<div data-dojo-props="title:'Iowa Department of Natural Resources',href:'splash.html',loadingMessage:'loading map...'" data-dojo-type="dijit.Dialog" id="splash"></div>
+</div>
+<div data-dojo-props="design:'headline',gutters:false" data-dojo-type="dijit.layout.BorderContainer" id="mainWindow" style="width: 100%; height: 100%; margin: 0;">
+<div class="toolContent" data-dojo-props="region:'top'" data-dojo-type="dijit.layout.ContentPane" id="header" style="height:100px;">
+<div id="heading">
+<a href="https://www.iowadnr.gov/" id="idnr_logo_link" title="Iowa Department of Natural Resources">
+<img alt="Iowa Department of Natural Resources" class="img-responsive" id="idnr_logo" src="https://programs.iowadnr.gov/maps/apis/idnr/js/gov/iowadnr/compactmap/images/logo_brown.png" style="border-width:0px;"/></a>
+</div>
+<div id="headtitle" style="white-space: nowrap; padding-right: 40%;"><strong>Iowa DNR Recreation Atlas</strong></div>
+<div id="header-toolbar"> </div>
+<!--	<div id="search-RecArea" class="customsearch">
+                <input id="search-RecArea-text" class="customsearchinput" type="text" placeholder="Search by Recreation Area Name"/> 
+                <input id="search-RecArea-button" class="customsearchbutton" type="image" src="js/gov/iowadnr/compactmap/images/searchicon.png" />    
+             </div> -->
+</div>
+<div data-dojo-props="region:'left'" data-dojo-type="dojox.layout.ExpandoPane" id="leftPane" maxwidth="150" style="width:210px;">
+<div data-dojo-props="attachParent:true,useMenu:true,tabStrip:true,useSlider:true,minSize:25" data-dojo-type="dijit.layout.TabContainer" id="tabContainer">
+<div class="customsearch" id="search-RecArea">
+<input class="customsearchinput" id="search-RecArea-text" placeholder="Search by Recreation Area Name" style="width: 170px" type="text"/>
+<input class="customsearchbutton" id="search-RecArea-button" src="js/gov/iowadnr/compactmap/images/searchicon.png" type="image"/>
+</div>
+<div data-dojo-props="title:'Legend'" data-dojo-type="dijit.layout.ContentPane" id="legendPane">
+<div id="legendDiv"></div>
+</div>
+<div data-dojo-props="title:'Map layers'" data-dojo-type="dijit.layout.ContentPane" id="layersTab">
+<div id="tocDiv"></div>
+</div>
+<div data-dojo-props="title:'Search'" data-dojo-type="dijit.layout.ContentPane" id="searchTab">
+<div id="searchDiv">
+<div id="searchwrapper">
+<button data-dojo-props="label:'Activity Search'" data-dojo-type="dijit.form.DropDownButton" id="recreationDropDownButton">
+<div data-dojo-type="dijit.Menu" id="recreationMenu">
+</div>
+</button>
+</div>
+<!--
+                      <div id="search-RecArea" class="customsearch">
+                                 <input id="search-RecArea-text" class="customsearchinput" type="text" placeholder="Search by Recreation Area Name"/> 
+                                 <input id="search-RecArea-button" class="customsearchbutton" type="image" src="js/gov/iowadnr/compactmap/images/searchicon.png" />    
+                      </div> -->
+</div>
+<div id="search-results">
+</div>
+<button data-dojo-props="label:'Clear Results'" id="clearMapGraphics" onclick="clearMapResults();">Clear Results</button>
+</div>
+</div>
+</div>
+<div class="shadow" data-dojo-props="region:'center'" data-dojo-type="dijit.layout.ContentPane" id="map">
+<div id="LocateButton"></div>
+<div id="ds">
+<div id="ds-h">
+<div class="ds h1 o1"></div>
+<div class="ds h2 o2"></div>
+<div class="ds h3 o3"></div>
+<div class="ds h4 o4"></div>
+<div class="ds h5 o5"></div>
+</div>
+<div id="ds-l">
+<div class="ds v1 o1"></div>
+<div class="ds v2 o2"></div>
+<div class="ds v3 o3"></div>
+<div class="ds v4 o4"></div>
+<div class="ds v5 o5"></div>
+</div>
+</div>
+<div id="measurePane">
+<div id="measurementDiv"> </div>
+</div>
+</div>
+<div class="sidebarContent" data-dojo-props="region:'bottom'" data-dojo-type="dijit.layout.ContentPane" id="footer">
+<div id="footer-toolbar">
+<div id="address-search">
+<input class="searchinput" id="address" placeholder="502 E. 9th St, Des Moines, IA 50319" type="text"/>
+<input class="searchbutton" id="search-address" src="https://programs.iowadnr.gov/maps/apis/idnr/js/gov/iowadnr/compactmap/images/blank.gif" type="image"/>
+<div data-dojo-props="connectId:'address',position:['above']" data-dojo-type="dijit.Tooltip" style="display: none;">
+<table cellpadding="2" width="280">
+<caption><b>Address Search</b></caption>
+<tr><td><i>Example</i></td><td><i>502 E. 9th St, Des Moines, IA 50319</i></td></tr>
+</table>
+</div>
+</div>
+<div id="plss-search">
+<input class="searchinput" id="plss" placeholder="T95NR45W02" type="text"/>
+<input class="searchbutton" id="search-plss" src="https://programs.iowadnr.gov/maps/apis/idnr/js/gov/iowadnr/compactmap/images/blank.gif" type="image"/>
+<div data-dojo-props="connectId:'plss',position:['above']" data-dojo-type="dijit.Tooltip" style="display: none;">
+<table cellpadding="2" width="225">
+<caption><b>Township-Range-Section Search</b></caption>
+<tr><td>Township</td><td><b>T</b>65 - 100<b>N</b></td></tr>
+<tr><td>Range</td><td><b>R</b>01 - 07<b>E</b></td></tr>
+<tr><td></td><td><b>R</b>01 - 49<b>W</b></td></tr>
+<tr><td>Section</td><td>01 - 36</td></tr>
+<tr><td></td><td></td></tr>
+<tr><td><i>Example</i></td><td><i>T84NR03E02</i></td></tr>
+</table>
+</div>
+</div>
+<div id="footercoords">
+<div class="coords">UTM Zone 15 NAD83<div id="divMapCoords">x,y</div></div>
+<div class="coords">WGS84<div id="divTransformedCoords">x,y</div></div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

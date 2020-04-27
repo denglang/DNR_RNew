@@ -1,0 +1,1423 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "https://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="IE=7,IE=9, IE=10" http-equiv="X-UA-Compatible"/>
+<!--<meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/> -->
+<title>Iowa DNR - Flood Plain</title>
+<link href="//js.arcgis.com/3.12/dijit/themes/nihilo/nihilo.css" rel="stylesheet"/>
+<link href="//js.arcgis.com/3.12/esri/css/esri.css" rel="stylesheet"/>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="//js.arcgis.com/3.12/dojox/layout/resources/FloatingPane.css" rel="stylesheet" type="text/css"/>
+<link href="//js.arcgis.com/3.12/dojox/layout/resources/ExpandoPane.css" rel="stylesheet" type="text/css"/>
+<link href="//js.arcgis.com/3.12/dojox/grid/resources/Grid.css" rel="stylesheet" type="text/css"/>
+<link href="//js.arcgis.com/3.12/dojox/grid/resources/nihiloGrid.css" rel="stylesheet" type="text/css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<!-- <link rel="stylesheet" href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dijit/themes/nihilo/nihilo.css">
+  	<link rel="stylesheet" href="https://js.arcgis.com/3.5/js/esri/css/esri.css">
+    <link rel="stylesheet" type="text/css" href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dojox/layout/resources/FloatingPane.css"/>
+    <link rel="stylesheet" type="text/css" href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dojox/layout/resources/ExpandoPane.css"/>
+    <link rel="stylesheet" type="text/css" href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dojox/grid/resources/Grid.css"/>
+    <link rel="stylesheet" type="text/css" href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dojox/grid/resources/nihiloGrid.css"/> 
+    <link rel="stylesheet" href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/esri/dijit/css/bookmarks.css">
+    <link rel="stylesheet" type="text/css" href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/esri/dijit/css/Popup.css"> -->
+<link href="js/gov/iowadnr/compactmap/iowadnr/dijit/CustomInfoWindow/InfoWindow.css" rel="stylesheet"/>
+<script src="https://programs.iowadnr.gov/maps/apis/proj4js/lib/proj4js-compressed.js" type="text/javascript"></script>
+<script src="https://programs.iowadnr.gov/maps/apis/proj4js/lib/defs/EPSG4326.js" type="text/javascript"></script>
+<script src="https://programs.iowadnr.gov/maps/apis/proj4js/lib/defs/EPSG102100.js" type="text/javascript"></script>
+<script src="https://programs.iowadnr.gov/maps/apis/proj4js/lib/defs/EPSG26915.js" type="text/javascript"></script>
+<script src="js/gov/iowadnr/compactmap/webmercatorbookmarks.js" type="text/javascript"></script>
+<script src="js/gov/iowadnr/compactmap/AGOLBasemaps.js" type="text/javascript"></script>
+<script src="js/mustache/mustache.js" type="text/javascript"></script>
+<script src="js/app.js" type="text/javascript"></script>
+<script src="js/leaflet/plugins/L.Control.Locate.min.js" type="text/javascript"></script>
+<script src="js/leaflet/plugins/esri-leaflet.js" type="text/javascript"></script>
+<script src="js/leaflet/plugins/lvector.js" type="text/javascript"></script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-40048805-1"></script>
+<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'UA-40048805-1');
+</script>
+
+<!--<script src="//sliver.iowa.gov/sliver.js" async defer></script> --> 
+
+<style> 
+      <!--html, body { height: 100%; width: 100%; margin: 0; padding: 0; } -->
+	  .toolContent{
+		margin-bottom:10px;
+		min-height:150px;  
+		max-height:200px;
+		background-color:silver;
+		text-align:center;
+		font-size:large;
+		}
+		.sidebarContent{
+		margin-bottom:3px;
+		min-height:80px;
+		background-color:silver;
+		text-align:center;
+		font-size:large;}
+      .sectitle { font-weight:bold;text-decoration: underline;}
+      .infotab {font-size: x-small;}
+    </style>
+<style media="print" type="text/css">
+    	/*@media print {   */		
+    		@page { 
+    			size: landscape;
+    			margin: 1cm;
+    			/*-webkit-transform: rotate(-90deg);
+				-moz-transform:rotate(-90deg);
+				filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3);*/
+    	    }
+
+			#header {display:none;}
+			#footer {display:none;}
+			#leftPane{display:none;}
+			#pinDivPrint {
+				page-break-before: always;
+				display: block;
+				font-size:x-small;
+			}
+			#p0p{float:left;}
+			
+		/*}*/
+    </style>
+<script type="text/javascript">
+        var djConfig = {
+          parseOnLoad: true,
+          packages: [{   
+		    "name": "agsjs",
+            "location": location.pathname.replace(/\/[^/]+$/, '') + '/js/gov/iowadnr/compactmap/dijits/agsjs' 
+          },
+          {   
+		    "name": "iowadnr",
+            "location": location.pathname.replace(/\/[^/]+$/, '') + '/js/gov/iowadnr/compactmap/iowadnr' 
+          }
+             
+          ]
+        };
+    </script>
+<script src="https://js.arcgis.com/3.12/"></script>
+<script type="text/javascript">
+      dojo.require("dijit.dijit");
+      dojo.require("esri.map");
+      dojo.require("esri.dijit.Scalebar");
+      dojo.require("esri.dijit.Popup");
+      dojo.require("esri.tasks.locator");
+      dojo.require("esri.tasks.find");
+      dojo.require("esri.tasks.identify");
+      dojo.require("dojo.number");
+      dojo.require("esri.layers.FeatureLayer");
+      dojo.require("esri.layers.agsdynamic");
+      dojo.require("dijit.layout.BorderContainer");
+      dojo.require("dijit.layout.ContentPane");
+      dojo.require("dijit.TitlePane");
+      dojo.require("dijit.layout.AccordionContainer");
+      dojo.require("dojox.layout.ExpandoPane");
+      dojo.require("dojox.layout.FloatingPane");
+      dojo.require("dijit.layout.TabContainer");
+      dojo.require("esri.dijit.Bookmarks");
+      dojo.require("esri.dijit.BasemapGallery");
+      dojo.require("esri.dijit.Legend");
+      dojo.require("esri.dijit.Measurement");
+      dojo.require("esri.arcgis.utils");
+      dojo.require("dijit.Tooltip");
+      dojo.require("dijit.Dialog");
+      dojo.require("dijit.form.Button");
+      dojo.require("dijit.form.Slider");
+      dojo.require("dijit.form.Textarea");
+      dojo.require("dijit.form.CheckBox");
+      dojo.require("dijit.form.TextBox");
+      dojo.require("dijit.form.ValidationTextBox");
+      dojo.require("dijit.form.Select");
+      dojo.require("dijit.Menu");
+      dojo.require("dojox.grid.DataGrid");
+      dojo.require("dojo.data.ItemFileReadStore");
+      dojo.require("dijit.Tooltip");
+      dojo.require("dojo.fx.easing");
+      dojo.require("dojo.cookie");
+      dojo.require("dojo.DeferredList"); 
+      dojo.require("agsjs.dijit.TOC");
+      dojo.require("iowadnr.dijit.CustomInfoWindow.InfoWindow");
+     </script>
+<script src="js/gov/iowadnr/compactmap/dnrcommon.js" type="text/javascript"></script>
+<style type="text/css">
+    	@import "js/gov/iowadnr/compactmap/css/dnrtheme.css";
+     </style>
+<script type="text/javascript">
+      var urlParams = dojo.queryToObject(window.location.search.slice(1));
+      var map = null;
+      var x = -93.383;
+      var y = 41.896;
+      var infoWindow;
+      var mapSpatialReference;
+      
+      //OPTIONS to SET Below
+      //See showAreaNameResults for example of markers on search
+      var splash = false;
+      var hasScalebar = true;
+      var plssServiceUrl = "https://arcgis01.iowadnr.gov/geospatial/rest/services/tools/plssLocator/MapServer";     
+      var locatorServiceUrl = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+      var geometryServiceUrl = "https://arcgis01.iowadnr.gov/geospatial/rest/services/Geometry/GeometryServer";
+      //var searchUrl = "https://arcgis01.iowadnr.gov/geospatial/rest/services/Recreation/Hunting/MapServer";
+      
+      var app = {};
+      app.activepintool = null;
+      app.infowindowcontent = {"p0":"","p1":""};
+      app.title = "Flood Plain Map";
+      app.infotitle = "Map information";
+      app.mapSpatialReferenceWKID = 102100;
+      app.LAYERSCONFIG = [{'title':'Iowa DNR',
+                           'serviceurl':'https://arcgis01.iowadnr.gov/geospatial/rest/services/Projects/floodplainsection/MapServer',
+                            'id':'idnr-fp',
+							'options':{'opacity':'1.0'},
+							'imageParameters':{'imageFormat':'png32'}, 
+							'includedlayers':[0,1,2,3,4], 
+							'initialvislayers':[0,3], 
+							'agsversion':'10.11'}                                 
+      					      
+                              ,{'title':'FEMA-NFHL',
+                                     'serviceurl':'https://hazards.fema.gov/gis/nfhl/rest/services/public/NFHL/MapServer',
+                                      'id':'fema-nfhl','options':{'opacity':'1.0'},'imageParameters':{'imageFormat':'png32'}, 'includedlayers':[0,3,16,23,24,28], 'initialvislayers':[0,28], 'agsversion':'10.11'}                                 
+      					      
+                              ,{'title':'Iowa Flood Hazard',
+                                     'serviceurl':'https://arcgis01.iowadnr.gov/geospatial/rest/services/SurfaceWaters/FloodHazardAreas/MapServer',
+                                      'id':'iowa-nfhl','options':{'opacity':'1.0'},'imageParameters':{'imageFormat':'png32'}, 'includedlayers':[0,1], 'initialvislayers':[0,1], 'agsversion':'10.11'}                                  
+      					 ];
+      					 
+      app.IDENTIFYCONFIG = [{"serviceurl":"https://hazards.fema.gov/gis/nfhl/rest/services/public/NFHL/MapServer",
+      						'identifylayers':[3,16,23,24,28],
+      						"layerfieldmapping":[
+      							//{layerId:0,fieldmap:{src:dst,src:dst}}
+      							{layerId:3,layerName:"FIRM Panels",fieldmap:{"FIRM_PAN":"NFHL-FIRM-PANEL","EFF_DATE":"NFHL-FIRM-EFF_DATE","VERSION_ID":"NFHL-FIRM-VERSION_ID"}}
+      						   ,{layerId:16,layerName:"Base Flood Elevations",fieldmap:{"ELEV":"NFHL-BFE-ELEV","LEN_UNIT":"NFHL-BFE-LEN_UNIT","V_DATUM":"NFHL-BFE-V_DATUM"}}
+      						    ,{layerId:23,layerName:"Levees",fieldmap:{"OBJECTID":"LEVEE-OBJECTID","LEVEE_NM":"LEVEE-LEVEE_NM","LEVEE_TYP":"LEVEE-LEVEE_TYP","WTR_NM":"LEVEE-WTR_NM","USACE_LEV":"ACCREDITTED"}}
+      							,{layerId:24,layerName:"General Structures",fieldmap:{"OBJECTID":"GENSTRUCT-OBJECTID","STRUCT_TYP":"GENSTRUCT-STRUCT_TYP","WTR_NM":"GENSTRUCT-WTR_NM"}}
+      							,{layerId:28,layerName:"Flood Hazard Zones",fieldmap:{"OBJECTID":"NFHL-ZONE-OBJECTID","FLD_ZONE":"NFHL-ZONE-FLD_ZONE","ZONE_SUBTY":"NFHL-ZONE-ZONE_SUBTY"}}
+      						],
+      					     "infotemplate":"<table>" + 
+      					     								//THIS IS an IF statements in Mustache.js
+      					     		    "{{#NFHL-FIRM-PANEL}}" +
+      					     			"<tr><td colspan = '2' class='sectitle'>NHFL DFIRM INFO</td></tr>" +
+      					     			"<tr><td>DFIRM ID</td><td>{{NFHL-FIRM-PANEL}} v. {{NFHL-FIRM-VERSION_ID}}</td></tr>" +
+      					     			"<tr><td>Effective</td><td>{{NFHL-FIRM-EFF_DATE}}</td></tr>" +
+      					     			"<tr><td colspan = '2'>&nbsp</td></tr>" +
+      					     			"{{/NFHL-FIRM-PANEL}}" +
+      					     			
+      					     			"{{#NFHL-BFE-ELEV}}" +
+      					     			"<tr><td colspan = '2' class='sectitle'>NHFL Elevation</td></tr>" +
+      					     			"<tr><td>DFIRM ID</td><td>{{NFHL-BFE-DFIRM_ID}}</td></tr>" +
+      					     			"<tr><td>Elevation</td><td>{{NFHL-BFE-ELEV}} {{NFHL-BFE-LEN_UNIT}},{{NFHL-BFE-V_DATUM}}</td></tr>" +
+      					     			"<tr><td colspan = '2'>&nbsp;</td></tr>" +
+      					     			"{{/NFHL-BFE-ELEV}}" +
+      					     			
+      					     			"{{#LEVEE-OBJECTID}}" +
+      					     			"<tr><td colspan = '2' class='sectitle'>LEVEE</td></tr>" +
+      					     			"<tr><td>Levee Name</td><td>{{LEVEE-LEVEE_NM}}</td></tr>" +
+      					     			"<tr><td>Levee Type</td><td>{{LEVEE-LEVEE_TYP}}</td></tr>" +
+      					     			"<tr><td>Water Name</td><td>{{LEVEE-WTR_NM}}</td></tr>" +
+      					     			"<tr><td>Accredited Levee(T=accredited)</td><td>{{ACCREDITED}}</td></tr>"+
+      					     			//U,F,T = Unaccredited Levee,Unacreddited Levee, Accredited Levee
+      					     			"<tr><td colspan = '2'>&nbsp;</td></tr>" +
+      					     			"{{/LEVEE-OBJECTID}}" +	
+      					     			
+      					     			"{{#GENSTRUCT-OBJECTID}}" +
+      					     			"<tr><td colspan = '2' class='sectitle'>General Structures</td></tr>"+
+      					     			"<tr><td>Structure Type</td><td>{{GENSTRUCT-STRUCT_TYP}}</td></tr>" +
+      					     			"<tr><td>Water Name</td><td>{{GENSTRUCT-WTR_NM}}</td></tr>" +
+      					     			"<tr><td colspan = '2'>&nbsp;</td></tr>" +
+      					     			"{{/GENSTRUCT-OBJECTID}}" +
+      					     			 
+      					     			"{{#NFHL-ZONE-OBJECTID}}" +
+      					     			"<tr><td colspan = '2' class='sectitle'>NFHL Hazard Zone</td></tr>"+
+      					     			"<tr><td colspan = '2'>{{NFHL-ZONE-FLD_ZONE}},{{NFHL-ZONE-ZONE_SUBTY}}</td><td></td></tr>" +
+      					     			"<tr><td colspan = '2'>&nbsp;</td></tr>" +
+      					     			"{{/NFHL-ZONE-OBJECTID}}" + 
+      					     			"</table>"
+      					    },
+      					    
+      					    {"serviceurl":"https://arcgis01.iowadnr.gov/geospatial/rest/services/SurfaceWaters/FloodHazardAreas/MapServer",
+      						'identifylayers':[0],
+      						"layerfieldmapping":[
+      							//{layerId:0,fieldmap:{src:dst,src:dst}}
+      							{layerId:0,layerName:"Zone",fieldmap:{"OBJECTID":"IOWA-ZONE-OBJECTID","FLD_ZONE":"IOWA-ZONE-FLD_ZONE","ZONE_SUBTY":"IOWA-ZONE-ZONE_SUBTY"}}
+      						],
+      					     "infotemplate":
+      					     			"<table>" + 
+      					     			"{{#IOWA-ZONE-OBJECTID}}" +
+      					     			"<tr><td colspan = '2' class='sectitle'>Iowa Hazard Zone</td></tr>"+
+      					     			"<tr><td colspan = '2'>{{IOWA-ZONE-FLD_ZONE}},{{IOWA-ZONE-ZONE_SUBTY}}</td><td></td></tr>" +
+      					     			"<tr><td colspan = '2'>&nbsp;</td></tr>" +
+      					     			"{{/IOWA-ZONE-OBJECTID}}" + 
+      					     			"</table>"
+      					   },
+      					    {"serviceurl":"https://arcgis01.iowadnr.gov/geospatial/rest/services/Projects/floodplainsection/MapServer",
+      						'identifylayers':[0,2,4,5,6],
+      						"layerfieldmapping":[
+      							//{layerId:0,fieldmap:{src:dst,src:dst}}
+      							{layerId:0,layerName:"usgsgage",fieldmap:{"STATION_NO":"USGS-STATION","NWIS_URL":"NWIS_URL"}},
+      							{layerId:2,layerName:"fp100yr",fieldmap:{"OBJECTID":"FP100YR-OBJECTID","DirName":"FP100YR_DIRNAME"}},
+      							{layerId:4,layerName:"nfip",fieldmap:{"OBJECTID":"NFIP-OBJECTID","COMMUNITY_NAME":"NFIP-COMMUNITY-NAME","PROGRAM_PHASE_DESCRIPTION":"PROGRAM-PHASE-DESCRIPTION","FLOODPLAIN_MANAGER":"FLOODPLAIN-MANAGER","Delegated":"DELEGATED", "TELEPHONE_NUMBER__FPM_":"NFIP-PHONE","email__FPM_":"NFIP-EMAIL"}},
+      							{layerId:5,layerName:"citydist",fieldmap:{"Pixel Value":"CITYDISTVALUE", "convertToFeet": function(){ b = (parseFloat(this) * 0.000621371).toFixed(2);return b;}}},
+      							,{layerId:6,layerName:"drain",fieldmap:{"Pixel Value":"DRAINVALUE"}}
+     
+      						],
+      					     "infotemplate":
+      					     			"<table>" + 
+         					     	    "{{#NFIP-OBJECTID}}" +
+      					     			"<tr><td colspan = '2' class='sectitle'>NFIP Community Info</td></tr>"+
+      					     			"<tr><td colspan = '2'>{{NFIP-COMMUNITY-NAME}}</td></tr>" +
+      					     			"<tr><td colspan = '2'>{{PROGRAM-PHASE-DESCRIPTION}}</td></tr>" +
+      					     			"<tr><td>Delegated</td><td>{{DELEGATED}}</td></tr>" +
+      					     			"<tr><td colspan = '2'>&nbsp;</td></tr>" +
+      					     			"<tr><td colspan = '2' class='sectitle'>FP Manager</td></tr>"+
+      					     			"<tr><td colspan = '2'>{{FLOODPLAIN-MANAGER}}</td></tr>" +
+      					     			"<tr><td colspan = '2'>{{NFIP-PHONE}}</td></tr>" +
+      					     			"<tr><td colspan = '2'>{{NFIP-EMAIL}}</td></tr>" +
+      					     			"<tr><td colspan = '2'>&nbsp;</td></tr>" +
+      					     			"{{/NFIP-OBJECTID}}" +    					     			
+      					     			
+      					     			
+      					     			"{{#USGS-STATION}}" +
+      					     			"<tr><td colspan = '2' class='sectitle'>Other Information</td></tr>"+
+      					     			"<tr><td colspan = '2'><a href='{{NWIS_URL}}' target='_blank'>USGS Gage: {{USGS-STATION}}</a></td><td></td></tr>" +
+      					     			"<tr><td colspan = '2'>&nbsp;</td></tr>" +
+      					     			"{{/USGS-STATION}}" + 
+      					     			
+      					     			"{{#FP100YR-OBJECTID}}" +
+      					     			"<tr><td colspan = '2' class='sectitle'>In 100 Year Floodplain</td></tr>"+
+      					     			"{{#FP100YR_DIRNAME}}" +
+      					     			"<tr><td colspan = '2'>{{.}}</td></tr>" +
+      					     			"{{/FP100YR_DIRNAME}}" +
+      					     			"<tr><td colspan = '2'>&nbsp;</td></tr>" +
+      					     			"{{/FP100YR-OBJECTID}}" + 
+      					     			
+      					     			
+      					     			"<tr><td colspan = '2' class='sectitle'>Distance from Incorporated Area</td></tr>"+
+      					     			"{{^CITYDISTVALUE}}" +
+      					     			"<tr><td colspan = '2'>>2 miles</td><td></td></tr>" +
+      					     			"<tr><td colspan = '2'>&nbsp;</td></tr>" +
+      					     			"{{/CITYDISTVALUE}}" + 
+      					     			
+      					     			
+      					     			"{{#CITYDISTVALUE}}" +
+      					     			"<tr><td colspan = '2'>{{convertToFeet}} miles</td><td></td></tr>" +
+      					     			"<tr><td colspan = '2'>&nbsp;</td></tr>" +
+      					     			"{{/CITYDISTVALUE}}" + 
+      					     			
+      					     			"{{#DRAINVALUE}}" +
+      					     			"<tr><td colspan = '2' class='sectitle'>Drainage Area</td></tr>"+
+      					     			"<tr><td colspan = '2'>{{DRAINVALUE}}  sq. miles</td><td></td></tr>" +
+      					     			"<tr><td colspan = '2'>&nbsp;</td></tr>" +
+      					     			"{{/DRAINVALUE}}" + 
+      					     			"</table>"
+      					    },
+      					    {"serviceurl":"https://arcgis01.iowadnr.gov/geospatial/rest/services/tools/plssLocator/MapServer",
+      						'identifylayers':[2],
+      						"layerfieldmapping":[
+      							//{layerId:0,fieldmap:{src:dst,src:dst}}
+      							{layerId:2,layerName:"plss",fieldmap:{"CO_NAME":"PLSS-CO_NAME","CO_NUMBER":"PLSS_CO_NUMBER","TRSQQQ":"PLSS-TRSQQQ"}}
+      						],
+      					     "infotemplate":
+      					     			"<table>" + 
+      					     			"{{#PLSS-CO_NAME}}" +
+      					     			"<tr><td colspan = '2' class='sectitle'>Legal Description</td></tr>"+
+      					     			"<tr><td colspan = '2'>{{PLSS-CO_NAME}} COUNTY({{PLSS_CO_NUMBER}})</td><td></td></tr>" +
+      					     			"<tr><td colspan = '2'>{{PLSS-TRSQQQ}}</td></tr>" +
+      					     			"<tr><td colspan = '2'>&nbsp;</td></tr>" +
+      					     			"{{/PLSS-CO_NAME}}" + 
+      					     			"</table>"
+      					   },
+					];     
+      
+      //END SET OPTIONS
+
+      
+      var pin0,pin1,zoom, showpin; //URL Params
+      var default_basemap="bmGray"; //NOT USED, bmRoads bmAerial bmHybrid bmGray bmTopo bmOSM
+      var basemap_gallery,legend;
+      var locator,identifyDijit,measureDijit;
+      var selectionHandler, clickHandler,clickListener;
+      var initialExtent;
+      var showcoordinates = true;
+      var maplayers = [];
+   
+      var findParams, plssFindTask;   
+
+
+     var bluePin,redPin,orangePin,greenPin, markerSymbol,lineSymbol,polygonSymbol;
+
+      function init() {
+      	    mapSpatialReference = new esri.SpatialReference({"wkid":app.mapSpatialReferenceWKID});
+      	    esri.config.defaults.geometryService = new esri.tasks.GeometryService(geometryServiceUrl);
+          	markerSymbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255,0,0]), 2), new dojo.Color([255,255,0,0.25]));
+            lineSymbol  = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255,0,0]), 2);
+            polygonSymbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_SQUARE, 10, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255, 0, 0]), 1), new dojo.Color([0, 255, 0, 0.50]));
+            bluePin = new esri.symbol.PictureMarkerSymbol({"angle":0,"xoffset":0,"yoffset":10,"type":"esriPMS","url":"https://static.arcgis.com/images/Symbols/Shapes/BluePin1LargeB.png","imageData":"iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAZdEVYdFNvZnR3YXJlAEFkb2JlIEltYWdlUmVhZHlxyWU8AAADImlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS4wLWMwNjAgNjEuMTM0Nzc3LCAyMDEwLzAyLzEyLTE3OjMyOjAwICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpCREZCRkY1M0QzMkMxMUUwQUU5NUVFMEYwMTY0NzUwNSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpCREZCRkY1NEQzMkMxMUUwQUU5NUVFMEYwMTY0NzUwNSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkJERkJGRjUxRDMyQzExRTBBRTk1RUUwRjAxNjQ3NTA1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkJERkJGRjUyRDMyQzExRTBBRTk1RUUwRjAxNjQ3NTA1Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQg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","contentType":"image/png","width":24,"height":24});
+      	    redPin = new esri.symbol.PictureMarkerSymbol({"angle":0,"xoffset":0,"yoffset":10,"type":"esriPMS","url":"https://static.arcgis.com/images/Symbols/Shapes/RedPin1LargeB.png","imageData":"iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAZdEVYdFNvZnR3YXJlAEFkb2JlIEltYWdlUmVhZHlxyWU8AAADImlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS4wLWMwNjAgNjEuMTM0Nzc3LCAyMDEwLzAyLzEyLTE3OjMyOjAwICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1MzA4NzI3NkQyN0MxMUUwQUU5NUVFMEYwMTY0NzUwNSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo1MzA4NzI3N0QyN0MxMUUwQUU5NUVFMEYwMTY0NzUwNSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjUzMDg3Mjc0RDI3QzExRTBBRTk1RUUwRjAxNjQ3NTA1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjUzMDg3Mjc1RDI3QzExRTBBRTk1RUUwRjAxNjQ3NTA1Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQg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","contentType":"image/png","width":24,"height":24});
+			orangePin = new esri.symbol.PictureMarkerSymbol({"angle":0,"xoffset":0,"yoffset":10,"type":"esriPMS","url":"https://static.arcgis.com/images/Symbols/Shapes/OrangePin1LargeB.png","imageData":"iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAZdEVYdFNvZnR3YXJlAEFkb2JlIEltYWdlUmVhZHlxyWU8AAADImlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS4wLWMwNjAgNjEuMTM0Nzc3LCAyMDEwLzAyLzEyLTE3OjMyOjAwICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDowRTA4NDg4NEQyODExMUUwQUU5NUVFMEYwMTY0NzUwNSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDowRTA4NDg4NUQyODExMUUwQUU5NUVFMEYwMTY0NzUwNSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkRBOTg5MTVCRDI4MDExRTBBRTk1RUUwRjAxNjQ3NTA1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkRBOTg5MTVDRDI4MDExRTBBRTk1RUUwRjAxNjQ3NTA1Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQg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","contentType":"image/png","width":24,"height":24}); 
+            greenPin = new esri.symbol.PictureMarkerSymbol({"angle":0,"xoffset":0,"yoffset":10,"type":"esriPMS","url":"https://static.arcgis.com/images/Symbols/Shapes/GreenPin1LargeB.png","imageData":"iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAZdEVYdFNvZnR3YXJlAEFkb2JlIEltYWdlUmVhZHlxyWU8AAADImlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS4wLWMwNjAgNjEuMTM0Nzc3LCAyMDEwLzAyLzEyLTE3OjMyOjAwICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpBQTQxMkU2NEQzMUUxMUUwQUU5NUVFMEYwMTY0NzUwNSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpBQTQxMkU2NUQzMUUxMUUwQUU5NUVFMEYwMTY0NzUwNSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkFBNDEyRTYyRDMxRTExRTBBRTk1RUUwRjAxNjQ3NTA1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkFBNDEyRTYzRDMxRTExRTBBRTk1RUUwRjAxNjQ3NTA1Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQg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","contentType":"image/png","width":24,"height":24});
+      	
+      	// infoWindow = new iowadnr.dijit.CustomInfoWindow.InfoWindow({
+          // domNode: dojo.create("div", null, dojo.byId("map"))
+        // });
+      	
+
+      	if (splash){
+	      dijit.byId("splash").show();
+	    };
+	   
+      	var toclayers = [];
+      	var legendlayers = [];
+      	
+	    if (urlParams['pin0'] || urlParams['pin1']){
+			 pin0,pin1,zoom = getURLParamValues(urlParams);
+			 if(pin0){
+			 	zoompt = pin0;
+			 }else{
+			  zoompt = pin1;
+			 }
+			 
+			 showpin=true;
+		} else {
+			zoom = getDefaultZoom();
+      		zoompt = new esri.geometry.Point(x,y,new esri.SpatialReference({ wkid:4326 }));
+			showpin = false;
+		}
+		
+		initPlssSearchParams(plssServiceUrl,mapSpatialReference);
+  	   		       
+       
+       for (lyr in app.LAYERSCONFIG) {
+	      	lyr_info = app.LAYERSCONFIG[lyr];
+	      	newlyr = new esri.layers.ArcGISDynamicMapServiceLayer(lyr_info.serviceurl,lyr_info.options);
+	      	newlyr.setImageFormat(lyr_info.imageParameters.imageFormat,false);
+	      	if (lyr_info.initialvislayers){
+	      		newlyr.setVisibleLayers(lyr_info.initialvislayers);
+	      	}
+	      	maplayers.push(newlyr);
+	        toclayers.push({'layer':maplayers[lyr],'title':lyr_info.title,'includedLayers':lyr_info.includedlayers, 'initialvislayers':lyr_info.initialvislayers, 'version':lyr_info.agsversion});
+       		legendlayers.push({'layer': maplayers[lyr],'title':lyr_info.title});
+       };    
+       
+
+          initialExtent = new esri.geometry.Extent({"xmin":-11046697,"ymin":4659284,"xmax":-9788237,"ymax":5602211,"spatialReference":{"wkid":102100}});
+	      
+	       map = new esri.Map("map", {
+	          center: zoompt,
+	          zoom: zoom,
+	          spatialReference: new esri.SpatialReference({"wkid":app.mapSpatialReferenceWKID})
+	        //  ,infoWindow: infoWindow
+	        });
+	      
+	      dojo.connect(map, "onLoad", function() {   
+			  clickListener = doIdentify;
+        	 });
+	        //After Layers Added create, Legend,TOC and Measurement Tools
+	        dojo.connect(map, 'onLayersAddResult', function(results) {
+	             createTOC(toclayers);
+	             createLegend(legendlayers);
+	             addMeasurementWidget();
+	             initIdentify(app.IDENTIFYCONFIG);
+	             createIdentifyTasks(app.IDENTIFYCONFIG);
+	             createBookmarks();          
+	             addMailMapButton();
+	             addPrintButton();
+	             //addSplashButton();
+	             addProjectButton();
+	             addDrainButton();
+	             
+	             dojo.connect(map, "onMouseMove", showCoordinates);
+	             dojo.connect(map, "onMouseDrag", showCoordinates);
+	             
+	             if (pin0){ptIdentify1(pin0,"projecttool");}
+	             if (pin1){
+	             	setTimeout(function(){ptIdentify2(pin1,"draintool");},250);}
+	       });        	
+	       
+	       createBasemapGallery(default_basemap);
+	       
+	       if (hasScalebar){
+	       	  var scalebar = new esri.dijit.Scalebar({
+			  map:map,
+			  attachTo:"bottom-left",
+			  scalebarStyle: "ruler",
+			  scalebarUnit: "english"
+			  });
+	       }    
+
+
+		  locator = new esri.tasks.Locator(locatorServiceUrl);
+	      dojo.connect(locator, "onAddressToLocationsComplete", showGeocodeResults);
+			
+          //Address Search Button
+	      dojo.connect(dojo.byId('search-address'),'onclick',function(){
+      			locateAddress();
+    	  });
+    	  //Address Search, Enter Key
+    	  dojo.connect(dojo.byId('address'),'onkeydown',function(e) {
+        		if(e.keyCode === 13){
+      			locateAddress();
+    	  }});
+    	  
+    	  //PLSS Search event/find task
+		  dojo.connect(dojo.byId('search-plss'),'onclick',function(){
+      			locatePLSS();
+    	  });
+    	  
+		  dojo.connect(dojo.byId('plss'),'onkeydown',function(e) {
+			if(e.keyCode === 13){
+			locatePLSS();
+    	  }});
+    	  
+         initHideShowTabListener();
+         dojo.connect(dijit.byId('map'),'resize',map,map.resize);	
+          // dojo.connect(map.infoWindow, "onShow", function() {
+          // dijit.byId("infowin").resize();
+        // });
+
+       //map.infoWindow.resize(200,200);
+       //map.infoWindow.setTitle(app.infotitle);
+		dojo.byId("headtitle").innerHTML = app.title;
+     }
+     
+     function initHideShowTabListener(){
+     	tabsVisible = true;
+     	dojo.connect(dijit.byId('leftPane'),'toggle',function(e){
+     		     	//alert('ok');
+     		if (tabsVisible){
+     			dojo.query("#tabContainer").style('display','none');
+            	tabsVisible = false;
+     		}else{
+     			dojo.query("#tabContainer").style('display','block');
+            	tabsVisible = true;
+     		}
+     	});
+     };
+      function getDefaultZoom(){
+     	if (window.innerWidth < 780){
+	      		zoom = 6;
+	      	} else if (window.innerWidth >= 780 && window.innerWidth < 1280){
+	      		zoom = 7;
+	      	}else if (window.innerWidth >= 1280){
+	      		zoom = 7;
+	      	}
+	     return zoom;
+     }
+      function getURLParamValues(urlParams){
+       	  
+       	  if(urlParams['pin0']){
+       	  	 pin0 = makePointFromParam(urlParams['pin0']);
+       	  }
+       	  if(urlParams['pin1']){
+       	  	 pin1 = makePointFromParam(urlParams['pin1']);
+       	  }
+       	    
+		  if (urlParams['z'])
+			  {
+			  	zoom = urlParams['z'];
+			  }else{
+			  	zoom = 5;
+			  }
+
+		  return pin0,pin1,zoom;
+      };
+	  function makePointFromParam(p)
+	  {  
+	  	 var pt;
+	  	 xy = p.split(",");
+	     if ( xy[0] > -180 && xy[0]< 180 && xy[1] > 0 && xy[1]< 90  ){
+		  	pt = new esri.geometry.Point(xy[0],xy[1],new esri.SpatialReference({ wkid:4326})); 
+		  }else{
+		  	console.error("coordinates not recognized");
+		  }
+	  	return pt;
+	  }
+      function createLegend(legendlayers){
+      	legend = new esri.dijit.Legend(
+      		{
+	  			map:map
+	  		    ,layerInfos: legendlayers.reverse()
+	  		},
+	  			"legendDiv"
+  			);
+			legend.startup();	
+      };
+   function createTOC(toclayers){
+      	mapTOC = new agsjs.dijit.TOC(
+        	{   
+	            map: map,
+	            layerInfos: toclayers
+	                    },
+	             "tocDiv");
+	    mapTOC.startup();
+	    dojo.connect(mapTOC, 'onLoad', function(){
+	    	     hideTOCLayers(toclayers);
+				 }); 
+       }
+    function hideTOCLayers(toclayers){
+      	for (i in toclayers){				
+      		 for (j in toclayers[i].layer.layerInfos){
+      		 	 if (toclayers[i].includedLayers.indexOf(parseInt(j)) == -1){
+      		 	 		mapTOC.findTOCNode(toclayers[i].layer,j).hide();
+      		 	 }
+      		 } 
+      	}
+      }        
+      function initPlssSearchParams(plssServiceUrl, mapSpatialReference){
+      	plssFindTask = new esri.tasks.FindTask(plssServiceUrl);
+      	findParams = new esri.tasks.FindParameters();
+		findParams.outSpatialReference = mapSpatialReference;
+		findParams.returnGeometry = true;
+		findParams.layerIds = [1];
+		findParams.searchFields = ["TRSQQQ"];
+      };
+      function locatePLSS() {
+        findParams.searchText = dojo.byId("plss").value;
+        if (findParams.searchText){
+        	plssFindTask.execute(findParams, showPlssResults, noPlssResults);
+        } else {
+        	map.graphics.clear();
+        }
+      }
+      function noPlssResults(error){
+      	map.graphics.clear();
+      	alert("Please enter a valid Township, Range and Section");
+      };
+      function showPlssResults(results){
+      	if (results.length>0){
+	      	map.graphics.clear(); 
+	        dojo.forEach(results, function(result) {
+	          var graphic = result.feature;
+	          switch (graphic.geometry.type) {
+	          case "point":
+	            graphic.setSymbol(markerSymbol);
+	            break;
+	          case "polyline":
+	            graphic.setSymbol(lineSymbol);
+	            break;
+	          case "polygon":
+	            graphic.setSymbol(polygonSymbol);
+	            break;
+	          }
+	
+	          map.graphics.add(graphic);
+	        });
+	         map.setExtent(esri.graphicsExtent(map.graphics.graphics).expand(1.5));
+       }else{
+       	alert("No location found");
+       };
+      };
+
+    function initIdentify(params){
+    	clickHandler = dojo.connect(map, "onClick", doIdentify);
+    }
+      
+    function doIdentify(evt) {  
+        //map.graphics.clear();
+        if (app.activepintool){          	 
+        var deferredTasks = dojo.map(app.TASKS, function (task) {
+         	        var dt = new dojo.Deferred();
+                    return dt;
+                }); 
+        var deferredTasksList = new dojo.DeferredList(deferredTasks);
+        
+      	deferredTasksList.then(showResults);//chain showResults onto your DeferredList
+        
+        identifyParams = new esri.tasks.IdentifyParameters();
+        identifyParams.tolerance = 3;
+        identifyParams.returnGeometry = false;
+        identifyParams.layerOption = esri.tasks.IdentifyParameters.LAYER_OPTION_ALL;
+        identifyParams.spatialReference = new esri.SpatialReference({"wkid":app.mapSpatialReferenceWKID});
+        identifyParams.geometry = evt.mapPoint;
+        identifyParams.width  = map.width;
+        identifyParams.height = map.height;
+        identifyParams.mapExtent = map.extent;
+        
+       for (i=0;i<app.TASKS.length;i++) { //Use 'for' instead of 'for...in' so you can sync tasks with defTasks
+                    try {
+                    	identifyParams.layerIds = app.IDENTIFYCONFIG[i].identifylayers;
+                        app.TASKS[i].execute(identifyParams, deferredTasks[i].callback, deferredTasks[i].errback); //Execute each task
+                    } catch (e) {
+                        console.log("Error caught");
+                        console.log(e);
+                        deferredTasks[i].errback(e); //If you get an error for any task, execute the errback
+                    }
+                }
+        }
+      }
+    
+     function ptIdentify1(pin,target) {
+     	tpt = transformCoordinate('EPSG:4326','EPSG:102100',pin.x,pin.y);
+		var pinpt0 = new esri.geometry.Point(tpt.x,tpt.y,new esri.SpatialReference({ wkid:102100})); 
+     	
+     	placeIdentifyLocationMarker2(target,pinpt0);
+        var deferredTasks = dojo.map(app.TASKS, function (task) {
+         	        var dt = new dojo.Deferred();
+                    return dt;
+                }); 
+        var deferredTasksList = new dojo.DeferredList(deferredTasks);
+        
+      	deferredTasksList.then(function(results){showPinResults(results,target,pinpt0);});//chain showResults onto DeferredList
+       
+        identifyParams = new esri.tasks.IdentifyParameters();
+        identifyParams.tolerance = 3;
+        identifyParams.returnGeometry = false;
+        identifyParams.layerOption = esri.tasks.IdentifyParameters.LAYER_OPTION_ALL;
+        identifyParams.spatialReference = new esri.SpatialReference({"wkid":app.mapSpatialReferenceWKID});
+        identifyParams.geometry = pinpt0;
+        identifyParams.width  = map.width;
+        identifyParams.height = map.height;
+        identifyParams.mapExtent = map.extent;
+        
+       for (i=0;i<app.TASKS.length;i++) { //Use 'for' instead of 'for...in' so you can sync tasks with defTasks
+                    try {
+                    	identifyParams.layerIds = app.IDENTIFYCONFIG[i].identifylayers;
+                        app.TASKS[i].execute(identifyParams, deferredTasks[i].callback, deferredTasks[i].errback); //Execute each task
+                    } catch (e) {
+                        console.log("Error caught");
+                        console.log(e);
+                        deferredTasks[i].errback(e); //If you get an error for any task, execute the errback
+                    }
+                }
+        //}
+       
+      }
+    
+        function ptIdentify2(pin,target) {
+     	tpt = transformCoordinate('EPSG:4326','EPSG:102100',pin.x,pin.y);
+		pinpt1 = new esri.geometry.Point(tpt.x,tpt.y,new esri.SpatialReference({ wkid:102100})); 
+     	
+     	placeIdentifyLocationMarker2(target,pinpt1);
+        	
+        	 
+        var deferredTasks2 = dojo.map(app.TASKS, function (task) {
+         	        var dt = new dojo.Deferred();
+                    return dt;
+                }); 
+        var deferredTasksList2 = new dojo.DeferredList(deferredTasks2);
+        
+      	deferredTasksList2.then(function(results){showPinResults2(results,target,pinpt1);});
+        
+
+        
+        identifyParams2 = new esri.tasks.IdentifyParameters();
+        identifyParams2.tolerance = 3;
+        identifyParams2.returnGeometry = false;
+        identifyParams2.layerOption = esri.tasks.IdentifyParameters.LAYER_OPTION_ALL;
+        identifyParams2.spatialReference = new esri.SpatialReference({"wkid":app.mapSpatialReferenceWKID});
+        identifyParams2.geometry = pinpt1;
+        identifyParams2.width  = map.width;
+        identifyParams2.height = map.height;
+        identifyParams2.mapExtent = map.extent;
+        
+       for (i=0;i<app.TASKS.length;i++) { //Use 'for' instead of 'for...in' so you can sync tasks with defTasks
+                    try {
+                    	identifyParams2.layerIds = app.IDENTIFYCONFIG[i].identifylayers;
+                        app.TASKS[i].execute(identifyParams2, deferredTasks2[i].callback, deferredTasks2[i].errback); //Execute each task
+                    } catch (e) {
+                        console.log("Error caught");
+                        console.log(e);
+                        deferredTasks2[i].errback(e); //If you get an error for any task, execute the errback
+                    }
+                }
+        //}
+       
+      }
+    
+      function callIdentifyLatLon(pt) {
+		map.graphics.clear(); 
+		tpt = transformCoordinate('EPSG:4326','EPSG:102100',pt.x,pt.y);
+		pinpt = new esri.geometry.Point(tpt.x,tpt.y,new esri.SpatialReference({ wkid:102100})); 
+		identifyParams.geometry = pinpt;
+		identifyParams.mapExtent = map.extent;
+		identifyTask.execute(identifyParams, function(idResults) { addToMap(idResults);});
+      }
+    
+    function createIdentifyTasks(layers)
+      {
+      	var tasks = new dojo.map(layers,function(layer)
+      	 {
+      		return new esri.tasks.IdentifyTask(layer.serviceurl);
+      	 });
+
+      	 app.TASKS = tasks;
+      	 
+      }
+      function showResults(r)
+      {
+      	var results = [];        
+        placeIdentifyLocationMarker();
+        
+        
+        var viewdata = {};
+        viewdata.lon = pinlocation["lon"];
+	   	viewdata.lat = pinlocation["lat"];
+	   	switch (app.activepintool){
+	   		case "projecttool":
+	   			headertemplate = "<img src='js/gov/iowadnr/compactmap/images/OrangePin16.png' />";
+	   			section = "p0";
+	   			break;
+	   		case "draintool":
+	   			headertemplate = "<img src='js/gov/iowadnr/compactmap/images/BluePin16.png' />";
+	   			section = "p1";
+	   			break;
+	   	    
+	   	    default:
+	   	        headertemplate = "";
+	   		
+	   	}
+		app.activepintool = null;
+	   	headertemplate += "{{lon}} {{lat}}<hr />";
+	   	content = renderTemplate(headertemplate,viewdata);
+        
+        for (i=0; i<r.length;i++)
+        {
+ 		 var v = createViewData (app.IDENTIFYCONFIG[i].layerfieldmapping ,r[i][1]);
+        	     content += renderTemplate(app.IDENTIFYCONFIG[i].infotemplate,v);
+        }
+	   	
+	   	setInfoWindowContent(content,section);
+      }
+     
+       function showPinResults(r,target,pinlocation)
+      {
+      	//console.info(target);
+      	var results = [];        
+       
+        var viewdata = {};
+        viewdata.lon = pinlocation.getLongitude().toFixed(6);
+	   	viewdata.lat = pinlocation.getLatitude().toFixed(6);
+	   	switch (target){
+	   		case "projecttool":
+	   		    //placeIdentifyLocationMarker2(target,pinlocation);
+	   			headertemplate = "<img src='js/gov/iowadnr/compactmap/images/OrangePin16.png' />";
+	   			section = "p0";
+	   			break;
+	   		case "draintool":
+	   		    //placeIdentifyLocationMarker3(target,pinlocation);
+	   			headertemplate = "<img src='js/gov/iowadnr/compactmap/images/BluePin16.png' />";
+	   			section = "p1";
+	   			break;
+	   	    
+	   	    default:
+	   	        headertemplate = "";
+	   		
+	   	}
+		//app.activepintool = null;
+	   	headertemplate += "{{lon}} {{lat}}<hr />";
+	   	content = renderTemplate(headertemplate,viewdata);
+        
+        for (i=0; i<r.length;i++)
+        {
+ 		 var v = createViewData (app.IDENTIFYCONFIG[i].layerfieldmapping ,r[i][1]);
+        	     content += renderTemplate(app.IDENTIFYCONFIG[i].infotemplate,v);
+        }
+	   	//console.info(content);
+	   	setInfoWindowContent(content,section);
+      }
+      
+    function showPinResults2(r,target,pinlocation)
+      {
+      	console.info(target);
+      	var results = [];        
+        
+        
+        var viewdata = {};
+        viewdata.lon = pinlocation.getLongitude().toFixed(6);
+	   	viewdata.lat = pinlocation.getLatitude().toFixed(6);
+	   	switch (target){
+	   		case "projecttool":
+	   		    //placeIdentifyLocationMarker2(target,pinlocation);
+	   			headertemplate = "<img src='js/gov/iowadnr/compactmap/images/OrangePin16.png' />";
+	   			section = "p0";
+	   			break;
+	   		case "draintool":
+	   		    //placeIdentifyLocationMarker3(target,pinlocation);
+	   			headertemplate = "<img src='js/gov/iowadnr/compactmap/images/BluePin16.png' />";
+	   			section = "p1";
+	   			break;
+	   	    
+	   	    default:
+	   	        headertemplate = "";
+	   		
+	   	}
+		//app.activepintool = null;
+	   	headertemplate += "{{lon}} {{lat}}<hr />";
+	   	content = renderTemplate(headertemplate,viewdata);
+        
+        for (i=0; i<r.length;i++)
+        {
+ 		 var v = createViewData (app.IDENTIFYCONFIG[i].layerfieldmapping ,r[i][1]);
+        	     content += renderTemplate(app.IDENTIFYCONFIG[i].infotemplate,v);
+        }
+	   	
+	   	setInfoWindowContent(content,section);
+      }
+      
+      
+      function placeIdentifyLocationMarker()
+      {
+      	
+      	switch (app.activepintool)
+      	{
+      		case "projecttool":
+	      		removePin("pin0");
+	      		symbol = orangePin;
+	      		pinlocation = {"lon":null, "lat":null, "id":"pin0"};
+      		break;
+      		
+      		case "draintool":
+	      		removePin("pin1");
+	      		symbol = bluePin;
+	      		pinlocation = {"lon":null, "lat":null, "id":"pin1"};
+      		break;
+      		
+      		default:
+	      		map.graphics.clear();
+	      		symbol = orangePin;
+	      		pinlocation = {"lon":null, "lat":null, "id":"pin0"};
+      		break;
+      	}
+
+      	var lon = identifyParams.geometry.getLongitude();
+      	var lat = identifyParams.geometry.getLatitude();
+      	
+      	pinlocation["lon"] = lon.toFixed(6);
+      	pinlocation["lat"] = lat.toFixed(6);
+		pt = new esri.geometry.Point(identifyParams.geometry.x,identifyParams.geometry.y,map.spatialReference);
+      	g = new esri.Graphic(pt,symbol,pinlocation,null);
+      	map.graphics.add(g);
+      }
+      
+      
+     function placeIdentifyLocationMarker2(target, pinpointobject)
+      {
+      	var pinlocation;
+      	switch (target)
+      	{
+      		case "projecttool":
+	      		removePin("pin0");
+	      		symbol = orangePin;
+	      		pinlocation = {"lon":pinpointobject.getLongitude(), "lat":pinpointobject.getLatitude(), "id":"pin0"};
+      		break;
+      		
+      		case "draintool":
+	      		removePin("pin1");
+	      		symbol = bluePin;
+	      		pinlocation = {"lon":pinpointobject.getLongitude(), "lat":pinpointobject.getLatitude(), "id":"pin1"};
+      		break;
+      		
+      		default:
+	      		map.graphics.clear();
+	      		symbol = orangePin;
+	      		pinlocation = {"lon":pinpointobject.getLongitude(), "lat":pinpointobject.getLatitude(), "id":"pin0"};
+      		break;
+      	}
+
+      	//var lon = pinpointobject.getLongitude();
+      	//var lat = pinpointobject.getLatitude();
+      	
+      	//pinlocation["lon"] = lon.toFixed(6);
+      	//pinlocation["lat"] = lat.toFixed(6);
+      	//TODO pass in POINT rather than relying on identify params
+		//pt = new esri.geometry.Point(identifyParams.geometry.x,identifyParams.geometry.y,map.spatialReference);
+      	var g = new esri.Graphic(pinpointobject,symbol,pinlocation,null);
+      	map.graphics.add(g);
+      }
+      function placeIdentifyLocationMarker3(target, pinpointobject)
+      {
+      	var pinlocation;
+      	switch (target)
+      	{
+      		case "projecttool":
+	      		removePin("pin0");
+	      		symbol = orangePin;
+	      		pinlocation = {"lon":null, "lat":null, "id":"pin0"};
+      		break;
+      		
+      		case "draintool":
+	      		removePin("pin1");
+	      		symbol = bluePin;
+	      		pinlocation = {"lon":null, "lat":null, "id":"pin1"};
+      		break;
+      		
+      		default:
+	      		map.graphics.clear();
+	      		symbol = orangePin;
+	      		pinlocation = {"lon":null, "lat":null, "id":"pin0"};
+      		break;
+      	}
+
+      	var lon = pinpointobject.getLongitude();
+      	var lat = pinpointobject.getLatitude();
+      	
+      	pinlocation["lon"] = lon.toFixed(6);
+      	pinlocation["lat"] = lat.toFixed(6);
+      	//TODO pass in POINT rather than relying on identify params
+		//pt = new esri.geometry.Point(identifyParams.geometry.x,identifyParams.geometry.y,map.spatialReference);
+      	var g = new esri.Graphic(pinpointobject,symbol,pinlocation,null);
+      	map.graphics.add(g);
+      }
+      
+      
+      function renderTemplate(template,viewdata)
+      {
+      	var output = Mustache.render(template, viewdata);
+      	return output;
+      }
+      function setInfoWindowContent(stringcontent, section)
+      {
+      	if (dojo.byId(section))
+      	{
+      		dojo.destroy(section);
+      		dojo.destroy(section+ "p");
+      		dojo.create("div",{"id":section,"class":"infotab"},"pinDiv");
+      		dojo.create("div",{"id":section+ "p","class":"infotab"},"pinDivPrint"); //Special div that is hidden until print css media query called
+      	}else {
+      		dojo.create("div",{"id":section,"class":"infotab"},"pinDiv");
+      		dojo.create("div",{"id":section+ "p","class":"infotab"},"pinDivPrint"); //Special div that is hidden until print css media query called
+      	}
+      	
+      	if(section==="p0"){
+      		app.infowindowcontent["p0"]=stringcontent;
+      		dojo.place(app.infowindowcontent["p0"],section);
+      		dojo.place(app.infowindowcontent["p0"],section + "p");
+      	} else if (section==="p1"){	
+      		app.infowindowcontent["p1"]=stringcontent;
+      		dojo.place(app.infowindowcontent["p1"],section);
+      		dojo.place(app.infowindowcontent["p1"],section + "p");
+      	}
+      	
+      	//Toggle pinTab
+      	var pane = dijit.byId("pinTab");
+      	var tabs = dijit.byId("tabContainer");
+      	tabs.selectChild(pane);
+
+      	// infoWindow.setContent(app.infowindowcontent["p0"]);
+      	// infoWindow.setContent2(app.infowindowcontent["p1"]);
+        // var windowposition = new Object();
+        // windowposition.x = map.width - 225;
+        // windowposition.y = -4;
+        // infoWindow.show(windowposition);
+      }
+
+
+      function addToMap(idResults) {
+      	map.graphics.clear();
+      	
+      	var lon = identifyParams.geometry.getLongitude();
+      	var lat = identifyParams.geometry.getLatitude();
+        //TODO pin0,pin1
+      	pinlocation = {"lon":null, "lat":null, "id":"MAILSITE"};
+      	pinlocation["lon"] = lon.toFixed(6);
+      	pinlocation["lat"] = lat.toFixed(6);
+		pt = new esri.geometry.Point(identifyParams.geometry.x,identifyParams.geometry.y,map.spatialReference);
+      	g = new esri.Graphic(pt,orangePin,pinlocation,null);
+      	map.graphics.add(g);
+
+	    var viewdata = createViewData(app.IDENTIFYCONFIG[0].layerfieldmapping,idResults);
+	    viewdata.lon = pinlocation["lon"];
+	   	viewdata.lat = pinlocation["lat"];
+		
+		var output = Mustache.render(app.IDENTIFYCONFIG[0].infotemplate, viewdata);
+        
+        //infoWindow.setContent(output);
+        //var windowposition = new Object();
+        //windowposition.x = map.width - 225;
+        //windowposition.y = -4;
+        //infoWindow.show(windowposition);
+      }
+      
+      function removePin(pinid)
+      {
+      	for (g in map.graphics.graphics)
+      	{
+      		if (map.graphics.graphics[g].attributes && map.graphics.graphics[g].attributes.id === pinid)
+      		{
+      			map.graphics.remove(map.graphics.graphics[g]);
+      		} //else {
+      		//	console.log("Nothing");
+      		//}
+ 	
+      	}
+      	
+      }
+      
+      function createViewData (layerdefs,results){
+      	var viewdata = new Object();
+			for (l in layerdefs) {
+			    for (lyr in results) {
+			        if (layerdefs[l].layerId == results[lyr].layerId){
+			           for (key in layerdefs[l].fieldmap){
+			              if(results[lyr].feature.attributes.hasOwnProperty(key)){
+			                viewdata[layerdefs[l].fieldmap[key]] = results[lyr].feature.attributes[key];
+			              } else {
+			              	
+			              	//viewdata[layerdefs[l].fieldmap[key]]= layerdefs[l].fieldmap[key];
+			              	viewdata[key]= layerdefs[l].fieldmap[key];
+			              }
+			           }
+			        }
+			    }
+			}
+      	return viewdata;
+      } 
+       
+      function showCoordinates(evt) {
+        var mp = evt.mapPoint;
+        pt01 = transformCoordinate('EPSG:102100','EPSG:26915',mp.x,mp.y);
+        pt02 = transformCoordinate('EPSG:102100','EPSG:4326',mp.x,mp.y);
+        dojo.byId("divMapCoords").innerHTML = pt01.x.toFixed(2) + ", " + pt01.y.toFixed(2);
+        dojo.byId("divTransformedCoords").innerHTML = pt02.x.toFixed(6) + ", " + pt02.y.toFixed(6);
+      }
+      function transformCoordinate(fromEPSG, toEPSG, x ,y){
+      	var source = new Proj4js.Proj(fromEPSG);    //source coordinates will be in Longitude/Latitude
+		var dest = new Proj4js.Proj(toEPSG);     //destination coordinates in LCC, south of France
+		var p = new Proj4js.Point(x,y);   //any object will do as long as it has 'x' and 'y' properties
+		return Proj4js.transform(source, dest, p);      //do the transformation.  x and y are modified in place
+      }
+      function locateAddress() {
+      	map.graphics.clear();
+        var address = {"SingleLine":dojo.byId("address").value};
+        locator.outSpatialReference= map.spatialReference;
+        locator.addressToLocations(address,["Loc_name"]);
+      }
+      function showGeocodeResults(candidates) {
+        var candidate;
+        var infoTemplate = new esri.InfoTemplate("Location", "Address: ${address}<br />Score: ${score}<br />Source locator: ${locatorName}");
+        var geom;
+       
+        dojo.every(candidates,function(candidate){
+          if (candidate.score > 80) {
+            var attributes = { address: candidate.address, score:candidate.score, locatorName:candidate.attributes.Loc_name };  
+            geom = candidate.location;
+
+            var graphic = new esri.Graphic(geom, redPin, attributes, infoTemplate);
+            map.graphics.add(graphic);
+            return false; //break out of loop after one candidate with score greater  than 80 is found.
+          }
+        });
+        if(geom !== undefined){
+          map.centerAndZoom(geom,14);
+        }
+      }       	
+	function addMeasurementWidget() {
+	   var fp = new dojox.layout.FloatingPane({
+	     title:"Measure",
+	     resizable: false,
+	     dockable: false,
+	     closable: false,
+	     style: "position:absolute;top:5px;left:5px;width:245px;height:175px;z-index:100;visibility:hidden;",
+	     id: 'measurePane'
+	   }, dojo.byId('measurePane'));
+	   fp.startup();
+	
+	   var titlePane = dojo.query('#measurePane .dojoxFloatingPaneTitle')[0];
+	   //add close button to title pane
+	   var closeDiv = dojo.create('div', {
+	     id: "closeBtn",
+	     innerHTML:  esri.substitute({close_title:"close",close_alt:"close"},'<a alt=${close_alt} title=${close_title} href="JavaScript:toggleMeasure();"><img  src="https://programs.iowadnr.gov/maps/apis/idnr/js/gov/iowadnr/compactmap/images/close.png"/></a>')
+	   }, titlePane);
+	
+	   measure = new esri.dijit.Measurement({
+	     map: map,
+	     id: 'measureTool',
+	     defaultAreaUnit: esri.Units.ACRES,
+	     defaultLengthUnit: esri.Units.FEET
+	   }, 'measurementDiv');
+	
+	   measure.startup();
+	   var measureButton = new dijit.form.ToggleButton({
+	     label: "Measure",
+	     title: "Measure", 
+	     id: "measureButton",
+	     iconClass: "esriMeasureIcon",
+	     baseClass: "dnrToolButton"
+	   });
+
+	   dojo.connect(measureButton, "onClick", function () {
+	     toggleMeasure();
+	   });
+	
+	   dojo.byId('header-toolbar').appendChild(measureButton.domNode);
+	 }
+  
+     function addMailMapButton(){
+  		 var mailButton = new dijit.form.ToggleButton({
+	     label: "Mail",
+	     title: "Mail", 
+	     id: "mailButton",
+	     iconClass: "dnrMailIcon",
+	     baseClass: "dnrToolButton"
+	    });
+	
+	   dojo.connect(mailButton, "onClick", function () {
+	     toggleMail();
+	   });
+	
+	   dojo.byId('header-toolbar').appendChild(mailButton.domNode);
+    }
+   function addPrintButton(){
+  		 var printButton = new dijit.form.ToggleButton({
+	     label: "Print",
+	     title: "Print", 
+	     id: "printButton",
+	     iconClass: "dnrPrintIcon",
+	     baseClass: "dnrToolButton"
+	    });
+	
+	   dojo.connect(printButton, "onClick", function () {
+	     printMap();
+	   });
+	
+	   dojo.byId('header-toolbar').appendChild(printButton.domNode);
+    }
+    
+    
+    function addSplashButton(){
+  	var splashButton = new dijit.form.ToggleButton({
+	     label: "Map Info",
+	     title: "Map Info", 
+	     id: "showsplash",
+	     iconClass: "dnrSplashIcon",
+	     baseClass: "dnrToolButton"
+	    });
+	   dojo.connect(splashButton, "onClick", function () {
+	     showSplash();
+	   });	
+	   dojo.byId('header-toolbar').appendChild(splashButton.domNode);	
+    }
+
+   function addDrainButton(){
+  	var drainButton = new dijit.form.ToggleButton({
+	     label: "Drainage Area",
+	     title: "Drainage Area", 
+	     id: "draintool",
+	     iconClass: "dnrDrainIcon",
+	     baseClass: "dnrToolButton"
+	    });
+	   dojo.connect(drainButton, "onClick", function () {
+	     app.activepintool = this.id;
+	   });	
+	   dojo.byId('header-toolbar').appendChild(drainButton.domNode);	
+    }
+    
+   function addProjectButton(){
+  	var projectButton = new dijit.form.ToggleButton({
+	     label: "Project",
+	     title: "Project", 
+	     id: "projecttool",
+	     iconClass: "dnrProjectIcon",
+	     baseClass: "dnrToolButton"
+	    });
+	   dojo.connect(projectButton, "onClick", function () {
+	     app.activepintool = this.id;
+	   });	
+	   dojo.byId('header-toolbar').appendChild(projectButton.domNode);	
+    }    
+    
+
+   function toggleMail(){
+   	
+  	baseurl = "https://" + window.location.hostname + window.location.pathname;  	
+    baseurl += "%3F";
+    var pins = "";
+    if (map.graphics.graphics.length > 0){
+    	for (i in map.graphics.graphics){
+    		if(typeof map.graphics.graphics[i].attributes !== "undefined"){
+	    		var pin = map.graphics.graphics[i].attributes["id"] + "=" + map.graphics.graphics[i].attributes["lon"] +"," + map.graphics.graphics[i].attributes["lat"];
+	    		pins+= pin + "%26" ;
+	    		zoom = map.getLevel();
+    		}
+    	}
+    } else {
+    	tpt = transformCoordinate('EPSG:102100','EPSG:4326',map.extent.getCenter().x,map.extent.getCenter().y);
+    	pins = tpt.x.toFixed(6) +"," + tpt.y.toFixed(6);
+    	zoom = map.getLevel();
+    	}
+    
+  	
+  	//baseurl += "%26loc=" + loc;
+  	baseurl+=  pins + "z=" + zoom;
+  	window.location = "mailto:?subject=Flood Plain Permit Location&body=" + baseurl;
+  }
+  
+  
+  function createBasemapGallery(default_basemap){
+      basemap_gallery = createWebMercatorGallery();
+      //basemap_gallery.startup();
+      selectionHandler = dojo.connect(basemap_gallery,"onSelectionChange",function(){
+          		dojo.disconnect(selectionHandler);
+          		map.addLayers(maplayers.reverse());
+      });
+      
+      //FORCE selectionChange to add layers, API throws an error since we are using all Bing Maps otherwise. 
+      //dijit.byId(basemap_gallery.id).onSelectionChange();
+
+   }
+	function showSplash(){
+		dijit.byId("splash").show();
+	}
+	function hideSplash() {
+		dijit.byId("splash").hide();
+	}
+    function enablePopups() {
+              if (clickListener) {
+                     clickHandler = dojo.connect(map, "onClick", clickListener);
+              }
+       }
+    function disablePopups() {
+          if (clickHandler) {
+            dojo.disconnect(clickHandler);
+            clickHandler = null;
+          }
+       }
+ function toggleMeasure() {
+   if (dojo.byId('measurePane').style.visibility === 'hidden') {
+     dijit.byId('measurePane').show();
+     disablePopups();
+     map.hideZoomSlider();
+   } else {
+     dijit.byId('measurePane').hide();
+     enablePopups();
+     map.showZoomSlider();
+     dijit.byId('measureButton').set('checked', false);
+     var measure = dijit.byId('measureTool');
+     measure.clearResult();
+     if (measure.activeTool) {
+       measure.setTool(measure.activeTool, false);
+     }
+   }
+ }
+function convertMetersToFeet(length){
+	length = parseInt(length * 3.28084); 
+	return length;
+}
+function sortAscending(property) {
+	return function (a,b) {
+	return (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+	};
+}
+function sortDescending(property) {
+	return function (a,b) {
+	return (a[property] > b[property]) ? -1 : (a[property] < b[property]) ? 1 : 0;
+	};
+}
+
+function stringToBoolean(string){
+	switch(string.toLowerCase()){
+		case "true": case "yes": case "1": return true;
+		case "false": case "no": case "0": case null: return false;
+		default: return false;
+	}
+}
+
+function printMap()
+{
+	if(dijit.byId("leftPane")._showing)
+		{
+			dijit.byId("leftPane").toggle();
+		}
+	setTimeout(function(){ window.print(); },500); //needs time to toggle the leftPane
+    
+}
+	
+ dojo.addOnLoad(init);
+ </script>
+</head>
+<body class="nihilo">
+<div class="dijitHidden">
+<div data-dojo-props="title:'Iowa Department of Natural Resources',href:'splash.html',loadingMessage:'loading map...'" data-dojo-type="dijit.Dialog" id="splash" title="AFO Siting Disclaimer and Help"></div>
+</div>
+<!--<div class="row">-->
+<div data-dojo-props="design:'headline',gutters:false" data-dojo-type="dijit.layout.BorderContainer" id="mainWindow" style="width: 100%; height: 100%; margin: 0;">
+<div class="toolContent" data-dojo-props="region:'top'" data-dojo-type="dijit.layout.ContentPane" id="header">
+<div id="heading">
+<a href="https://www.iowadnr.gov/" id="idnr_logo_link" title="Iowa Department of Natural Resources">
+<img alt="Iowa Department of Natural Resources" id="idnr_logo" src="https://programs.iowadnr.gov/maps/apis/idnr/js/gov/iowadnr/compactmap/images/logo_brown.png" style="border-width:0px;"/></a>
+</div>
+<div id="headtitle"></div>
+<div id="header-toolbar"> </div>
+</div>
+<!--<div class="row"> class="col-lg-2 col-md-2 col-sm-2"-->
+<div data-dojo-props="region:'left'" data-dojo-type="dojox.layout.ExpandoPane" id="leftPane" maxwidth="230" style="width:200px;">
+<div data-dojo-props="attachParent:true,useMenu:false,tabStrip:false,useSlider:false,minSize:25" data-dojo-type="dijit.layout.TabContainer" id="tabContainer">
+<div data-dojo-props="title:'Legend'" data-dojo-type="dijit.layout.ContentPane" id="legendPane">
+<div id="legendDiv"></div>
+</div>
+<div data-dojo-props="title:'Map layers'" data-dojo-type="dijit.layout.ContentPane" id="layersTab">
+<div id="tocDiv"></div>
+</div>
+<div data-dojo-props="title:'Info'" data-dojo-type="dijit.layout.ContentPane" id="pinTab">
+<div id="pinDiv"></div>
+</div>
+</div>
+</div>
+<!--<div class="col-lg-8 col-md-9 col-sm-9"> -->
+<div data-dojo-props="region:'center'" data-dojo-type="dijit.layout.ContentPane" id="map">
+<div id="ds">
+<div id="ds-h">
+<div class="ds h1 o1"></div>
+<div class="ds h2 o2"></div>
+<div class="ds h3 o3"></div>
+<div class="ds h4 o4"></div>
+<div class="ds h5 o5"></div>
+</div>
+<div id="ds-l">
+<div class="ds v1 o1"></div>
+<div class="ds v2 o2"></div>
+<div class="ds v3 o3"></div>
+<div class="ds v4 o4"></div>
+<div class="ds v5 o5"></div>
+</div>
+</div>
+<div id="measurePane">
+<div id="measurementDiv"> </div>
+</div>
+</div>
+<!--</div> 
+	  </div> -->
+<div class="sidebarContent" data-dojo-props="region:'bottom'" data-dojo-type="dijit.layout.ContentPane" id="footer">
+<div id="footer-toolbar">
+<div id="address-search">
+<input class="searchinput" id="address" placeholder="502 E. 9th St, Des Moines, IA 50319" type="text"/>
+<input class="searchbutton" id="search-address" src="https://programs.iowadnr.gov/maps/apis/idnr/js/gov/iowadnr/compactmap/images/blank.gif" type="image"/>
+<div data-dojo-props="connectId:'address',position:['above']" data-dojo-type="dijit.Tooltip" style="display: none;">
+<table cellpadding="2" width="280">
+<caption><b>Address Search</b></caption>
+<tr><td><i>Example</i></td><td><i>502 E. 9th St, Des Moines, IA 50319</i></td></tr>
+</table>
+</div>
+</div>
+<div id="plss-search">
+<input class="searchinput" id="plss" placeholder="T95NR45W02" type="text"/>
+<input class="searchbutton" id="search-plss" src="https://programs.iowadnr.gov/maps/apis/idnr/js/gov/iowadnr/compactmap/images/blank.gif" type="image"/>
+<div data-dojo-props="connectId:'plss',position:['above']" data-dojo-type="dijit.Tooltip" style="display: none;">
+<table cellpadding="2" width="225">
+<caption><b>Township-Range-Section Search</b></caption>
+<tr><td>Township</td><td><b>T</b>65 - 100<b>N</b></td></tr>
+<tr><td>Range</td><td><b>R</b>01 - 07<b>E</b></td></tr>
+<tr><td></td><td><b>R</b>01 - 49<b>W</b></td></tr>
+<tr><td>Section</td><td>01 - 36</td></tr>
+<tr><td></td><td></td></tr>
+<tr><td><i>Example</i></td><td><i>T84NR03E02</i></td></tr>
+</table>
+</div>
+</div>
+<div id="footercoords">
+<div class="coords">UTM Zone 15 NAD83<div id="divMapCoords">x,y</div></div>
+<div class="coords">WGS84<div id="divTransformedCoords">x,y</div></div>
+</div>
+</div>
+</div>
+</div>
+<div id="pinDivPrint"></div>
+</body>
+</html>

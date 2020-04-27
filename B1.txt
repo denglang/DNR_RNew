@@ -1,0 +1,449 @@
+<html lang="en-US">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+	<link rel="stylesheet" href="https://js.arcgis.com/3.31/esri/themes/calcite/dijit/calcite.css">
+	<link rel="stylesheet" href="https://js.arcgis.com/3.31/esri/css/esri.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" **media="screen"
+		** type="text/css">
+
+	<!--<script src="/js/tether.min.js"></script> -->
+	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/tether-tooltip/1.2.0/js/tooltip.min.js"></script> -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.debug.js"></script>
+
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-40048805-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag() { dataLayer.push(arguments); }
+		gtag('js', new Date());
+		gtag('config', 'UA-40048805-1');
+	</script>
+
+	<!--<script src="//sliver.iowa.gov/sliver.js" async defer></script>  -->
+	<!--
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.debug.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script> -->
+
+	<!--<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.matchHeight/0.7.0/jquery.matchHeight-min.js"><script> -->
+	<title>Burial</title>
+
+	<style>
+		#scale {
+			font-size: 1em;
+			background-color: black;
+			position: relative;
+			bottom: 40px;
+			left: 10px;
+		}
+
+		#info {
+			position: relative;
+			top: 20px;
+			left: 30px;
+		}
+
+		.contentPane {
+			font-size: 1em;
+			background-attachment: grey !important;			
+		}
+		#layerListDom{
+		 position: absolute;
+		left: 70%;
+		top: 5%;
+		}
+		.esriScalebarSecondNumber{
+			color: white;		
+		}
+		
+	</style>
+	<script src="https://js.arcgis.com/3.31/"></script>
+	<script>
+		require([
+			"esri/arcgis/utils",
+			"esri/map",
+			"esri/dijit/LayerList",
+			"esri/dijit/InfoWindow",
+			"esri/geometry/webMercatorUtils",
+			"dojo/dom",
+			"dojo/on",
+			"esri/geometry/Circle",
+			"esri/dijit/BasemapToggle",
+			"esri/layers/GraphicsLayer",
+			"esri/graphic",
+			"esri/dijit/Scalebar",
+			"esri/InfoTemplate",
+			"esri/layers/ArcGISDynamicMapServiceLayer",
+			"esri/symbols/SimpleFillSymbol",
+			"esri/symbols/SimpleLineSymbol",
+			"esri/symbols/SimpleMarkerSymbol",
+			"esri/tasks/IdentifyTask",
+			"esri/tasks/IdentifyParameters",
+			"esri/dijit/Popup",
+			"esri/dijit/Search",
+			"esri/dijit/LocateButton",
+			"esri/tasks/FindTask",
+			"esri/tasks/FindParameters",
+			"dojo/_base/array",
+			"esri/Color",
+			"dojo/dom-construct",
+			"dojo/i18n!esri/nls/jsapi",
+			//"dijit/Tooltip",
+			"dojo/domReady!"
+		], function (
+			arcgisUtils, Map, LayerList, InfoWindow, webMercatorUtils, dom, on, Circle, BasemapToggle, GraphicsLayer, Graphic, Scalebar, InfoTemplate, ArcGISDynamicMapServiceLayer, SimpleFillSymbol,
+			SimpleLineSymbol, SimpleMarkerSymbol, IdentifyTask, IdentifyParameters, Popup, Search, LocateButton, FindTask, FindParameters,
+			arrayUtils, Color, domConstruct, esriBundle
+		) {
+			var popup = new Popup({
+				fillSymbol: new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+					new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+						new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]))
+			}, domConstruct.create("div"));
+
+			popup.setTitle("Burial Layers Info"); //this will also give maxmize and close window buttons
+			/*
+			 var infoWindow = new  InfoWindow({
+					  domNode: domConstruct.create("div", null, dom.byId("map"))
+				   });
+			 
+			  infoWindow.startup();
+			  */
+			map = new Map("map", {
+				basemap: "hybrid",
+				center: [-93.8899, 41.8119],
+				zoom: 7,
+				infoWindow: popup
+			});
+
+			let scalebar = new Scalebar({
+				map: map,
+				scalebarUnit: "english"
+			})
+			
+			
+
+			let burialLayer = "https://programs.iowadnr.gov/geospatial/rest/services/Agriculture/Burial/MapServer";
+			map.addLayer(new ArcGISDynamicMapServiceLayer(burialLayer, { "opacity": 1.0 }));
+
+			map.on("extent-change", function (evt) {
+				document.getElementById("scale").innerHTML = "Current scale = 1:" + Number(map.getScale().toFixed(2)).toLocaleString();
+				if (map.getScale() < 50000) {
+					$('#scale').css({ 'background-color': 'blue', 'font-size': '1.0em' });
+					//map.setMaxScale(20000);
+				} else {
+					$('#scale').css({ 'background-color': 'black', 'font-size': '1em' });
+				}
+				if (map.getScale() < 500000) {
+					$('#legendIMG').hide();
+				} else {
+					$('#legendIMG').show();
+				}
+			});
+
+		
+			symbolSize = 14,
+				lineColor = new Color([255, 255, 255]),
+				fillColor = new Color([164, 66, 244, 0.75]),
+				line = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+					lineColor, 3),
+				sms = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE,
+					symbolSize, line, fillColor);
+
+			var LAYERSCONFIG = [{'title':'Well Data',
+                                 'serviceurl':'https://programs.iowadnr.gov/geospatial/rest/services/OneStop/IaFmFacilities/MapServer',
+                                 'id':'wells',
+								 'options':{'opacity':'1.0'}, 
+								 'imageParameters':{'imageFormat':'png32'},
+								 'includedlayers':[20,21,22,23,24,25,26,27,28], 
+								 'initialvislayers':[22,24], 
+								 'agsversion':'10.11'},   
+      					 
+                              {'title':'Burial Zone Data',
+								 'serviceurl':'https://programs.iowadnr.gov/geospatial/rest/services/Agriculture/Burial/MapServer',
+								  'id':'afo',
+								  'options':{'opacity':'1.0'},
+								  'imageParameters':{'imageFormat':'png32'}, 
+								  'includedlayers':[0,1,2], 
+								  'initialvislayers':[3, 4, 5, 6, 7, 8, 9, 10], 
+								  'agsversion':'10.11'}];
+      			
+			/*
+			var djConfig = {
+				  parseOnLoad: true,
+				  packages: [{   
+					"name": "agsjs",
+					"location": location.pathname.replace(/\/[^/]+$/, '') + '/js/gov/iowadnr/compactmap/dijits/agsjs' 
+				  },
+				  {   
+					"name": "iowadnr",
+					"location": location.pathname.replace(/\/[^/]+$/, '') + '/js/gov/iowadnr/compactmap/iowadnr' 
+				  }					 
+				  ]
+				};
+			//X:\afo\js\gov\iowadnr\compactmap\dijits\agsjs\dijit
+			//dojo.require("agsjs.dijit.TOC");
+			
+			
+			 dojo.connect(map, 'onLayersAddResult', function(results) {
+	             createTOC(toclayers);
+	             createLegend(legendlayers);
+				});			
+			*/
+			var toclayers = [];
+			var legendlayers = [];  
+			var maplayers = [];
+			
+			for (lyr in LAYERSCONFIG) {
+			console.log(lyr);
+	      	lyr_info = LAYERSCONFIG[lyr];
+	      	let newlyr = new esri.layers.ArcGISDynamicMapServiceLayer(lyr_info.serviceurl,lyr_info.options);
+	      	newlyr.setImageFormat(lyr_info.imageParameters.imageFormat,false);
+	      	if (lyr_info.initialvislayers){
+	      		newlyr.setVisibleLayers(lyr_info.initialvislayers);
+	      	}
+	      	maplayers.push(newlyr);
+	        toclayers.push({'layer':maplayers[lyr],'title':lyr_info.title,'includedLayers':lyr_info.includedlayers, 'initialvislayers':lyr_info.initialvislayers, 'version':lyr_info.agsversion});
+       		legendlayers.push({'layer': maplayers[lyr],'title':lyr_info.title});
+           };    
+		   map.addLayers(maplayers.reverse());
+		   /*
+		   console.log(maplayers);
+			
+			function createLegend(legendlayers){
+				legend = new esri.dijit.Legend(
+					{
+						map:map
+						,layerInfos: legendlayers.reverse()
+					},
+						"legendDiv"
+					);
+					legend.startup();	
+			  };
+		   function createTOC(toclayers){
+				mapTOC = new agsjs.dijit.TOC(
+					{   
+						map: map,
+						layerInfos: toclayers
+								},
+						 "tocDiv");
+				mapTOC.startup();
+				dojo.connect(mapTOC, 'onLoad', function(){
+						 hideTOCLayers(toclayers);
+						 }); 
+			   }
+			   
+			  function hideTOCLayers(toclayers){
+					for (i in toclayers){				
+						 for (j in toclayers[i].layer.layerInfos){
+							 if (toclayers[i].includedLayers.indexOf(parseInt(j)) == -1){
+									mapTOC.findTOCNode(toclayers[i].layer,j).hide();
+							 }
+						 } 
+					}
+				  }      
+			*/  
+			var layerList = new LayerList({
+				map: map,
+				showLegend: true,
+				showSubLayers: false,
+				showOpacitySlider: true,
+				layers: toclayers
+			  },"layerListDom");
+			layerList.startup();
+			
+			function showCoordinates(evt) {
+				//the map is in web mercator but display coordinates in geographic (lat, long)
+				mp = webMercatorUtils.webMercatorToGeographic(evt.mapPoint);
+				//var mp = webMercatorUtils.webMercatorToGeographic(endPoint);
+				//display mouse coordinates
+				lat = 0.000;
+				lon = 0.000;
+				lat = mp.y.toFixed(4);
+				lon = mp.x.toFixed(4);
+				dom.byId("info").innerHTML = mp.x.toFixed(4) + ", " + mp.y.toFixed(4);
+			}
+			
+			map.on("click", doIdentify);
+			//dojo.connect(map, 'onClick', doIdentify);
+			
+			
+
+			function doIdentify(evt) {
+				let infoContent = "";
+				let mp = webMercatorUtils.webMercatorToGeographic(evt.mapPoint);
+				infoContent += "X,Y: " + mp.x.toFixed(4) + ", " + mp.y.toFixed(4) + "<br>";
+
+
+				if (map.getScale() > 50000) {
+					alert("Please zoom in until you see the current map scale at lower left\nturn blue or the scale bar showing 0.2mi or smaller; then click to see result.");
+					return;
+				}
+				//console.log(evt);
+				map.graphics.clear();
+				// markerSymbol is used for point and multipoint, see http://raphaeljs.com/icons/#talkq for more examples
+				//var markerSymbol = new SimpleMarkerSymbol();
+				//markerSymbol.setPath("M16,4.938c-7.732,0-14,4.701-14,10.5c0,1.981,0.741,3.833,2.016,5.414L2,25.272l5.613-1.44c2.339,1.316,5.237,2.106,8.387,2.106c7.732,0,14-4.701,14-10.5S23.732,4.938,16,4.938zM16.868,21.375h-1.969v-1.889h1.969V21.375zM16.772,18.094h-1.777l-0.176-8.083h2.113L16.772,18.094z");
+				//markerSymbol.setColor(new Color("#00FFFF"));
+			
+				map.graphics.add(new Graphic(evt.mapPoint, sms));
+
+
+				let identifyTask = new IdentifyTask(burialLayer);
+				let identifyParams = new IdentifyParameters();
+				identifyParams.tolerance = 5;
+				identifyParams.returnGeometry = false;
+				//identifyParams.layerIds = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,26,27]; //flowaccsqmi(layer 6 is taken off,  just use layer 10-DA polygon)
+				identifyParams.layerOption = IdentifyParameters.LAYER_OPTION_ALL;  //redundancy with the layerIds.
+				identifyParams.width = map.width;
+				identifyParams.height = map.height
+				identifyParams.geometry = evt.mapPoint;
+
+				identifyParams.mapExtent = map.extent;
+
+				//let burialZone ="";
+				// let alluvial, publicWaterSupply, insideCities, wetland, conservationEasement, floodArea, floodPlain;
+				// let waterProtectionZone, woodyVegetation, NHD,publicLand, PrivateWellPermit;
+
+				var deferred = identifyTask
+					.execute(identifyParams)
+					.addCallback(function (response) {
+						// response is an array of identify result objects
+						// Let's return an array of features.
+						console.log(response);
+						let arrValues = arrayUtils.map(response, function (result) {
+							var feature = result.feature;
+							var layerName = result.layerName;
+							let layerId = result.layerId;
+
+							//feature.attributes.layerName = layerName;
+							//console.log(result.layerId);
+							if (layerId === 2) {
+								burialZone = "${feature.attributes['Pixel Value']}";
+								//burialZone = "${CATEGORY}";
+								infoContent += `Burial Zone: ${feature.attributes['CATEGORY']}</br>`;
+								//console.log(burialZone);
+								// feature.setInfoTemplate(alluvialTemplate);
+							}
+							else if (layerId === 3) {
+								
+								infoContent += `Alluvial: ${feature.attributes['DESCR_']} <br>`;
+							} 
+							else if (layerId === 4) {
+
+								infoContent += `Public Water Supply - Non-Municipal: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							} else if (layerId === 5) {
+								
+								infoContent += `Inside Cities: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							} else if (layerId === 6) {
+								
+								infoContent += `Surface Water Set-back - Wetland: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							} else if (layerId === 27) {
+								infoContent += `Surface Water Set-back - Streams: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							}
+							else if (layerId === 7) {
+								
+								infoContent += `Conservation Easements:${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							} else if (layerId === 8) {
+								
+								infoContent += `SinkHoles:${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							} else if (layerId === 9) {
+								
+								infoContent += `Steep Slopes:${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							} else if (layerId === 10) {
+								
+								infoContent += `Floodplain Area:${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							} else if (layerId === 11) {
+								
+								infoContent += `Floodplain:${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							} else if (layerId === 12) {
+								
+								infoContent += `Source Water Protection Zones: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							} else if (layerId === 13) {
+								
+								infoContent += `Woody Vegetation: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							} else if (layerId === 14) {
+								
+								infoContent += `Public Water Supplies - Municipal: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							} else if (layerId === 15) {
+								
+								infoContent += `NHD: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							
+							} else if (layerId === 16) {
+								
+								infoContent += `Steep Slopes: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							} else if (layerId === 17) {
+								
+								infoContent += `Private Permitted Wells: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							}
+							else if (layerId === 18) {
+
+								infoContent += `Excessively Drained: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							}
+							else if (layerId === 19) {
+
+								infoContent += `Flood Frequency: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							}
+							else if (layerId === 20) {
+
+								infoContent += `Moderate Slopes: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							}
+							else if (layerId === 21) {
+
+								infoContent += `Ponded Soils: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							}
+							else if (layerId === 22) {
+
+								infoContent += `Depth to Seasonal High Water Table (SHWT): ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							}
+							else if (layerId === 23) {
+
+								infoContent += `Landscape Position: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							}
+							else if (layerId === 24) {
+
+								infoContent += `Landscape Position - Upland Drainages: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							}
+							else if (layerId === 25) {
+								infoContent += `Shallow Depth to Bedrock: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							}
+
+							else if (layerId === 26) {
+								infoContent += `Ag Drainage Wells: ${feature.attributes['Pixel Value'] == 1 ? 'Yes' : 'No'}<br>`;
+							}
+							return feature;
+
+						});
+						infoContent += "<a href='https://www.iowadnr.gov/Environment/LandStewardship/AnimalFeedingOperations/Mapping/ProperAFOSiting.aspx' target = '_blank'>Proper AFO Siting</a><br />";
+						infoContent += "<a href='https://www.iowadnr.gov/portals/idnr/uploads/afo/hqwr2.pdf' target = '_blank'>High Quality Waters information</a><br />";
+						infoContent += "<a href='https://www.iowadnr.gov/Portals/idnr/uploads/afo/files/Alluvial-Karst%20determinations-Final1-24-12%20w%20links.pdf' target = '_blank'>Alluvial and Karst Determinations</a><br /><br />"; 
+						//infoContent.removeDuplicate()
+						map.infoWindow.setContent(infoContent);
+						map.infoWindow.resize(400, 620);
+						map.infoWindow.show(evt.mapPoint, map.getInfoWindowAnchor(evt.screenPoint));
+						console.log(infoContent);
+					});
+			}
+		})
+
+	</script>
+</head>
+
+<body>
+
+	<div id="map" style="padding: 10px; height:800px; width: 1300px;">
+		<div id="BasemapToggle"></div>
+		<span id="scale" class="hidden-print"
+			style="position:absolute; left:250px; bottom:120px; z-index:100; color:white">
+			<div id='info'></div>
+			
+	</div>
+	<div id="layerListDom"></div>
+	<div id="scalebar"></div>
+</body>
+
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Using FeatureTable</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/3.31/dijit/themes/claro/claro.css">
+  <link rel="stylesheet" href="https://js.arcgis.com/3.31/esri/css/esri.css">
+  <script src="https://js.arcgis.com/3.31/"></script>
+ <script src="//sliver.iowa.gov/sliver.js" async defer></script> 
+  <style>
+    html, body, #map{
+      width:100%;
+      height:100%;
+      margin:0;
+      padding:0;
+    }
+	.header{
+		text-align: center;
+		height: 12%; 
+		background-color: #DDD;
+	}
+	.footer{
+		height: 5%;
+		background-color: #EEE;
+	}
+  </style>
+
+  <script>
+    require([
+      "esri/layers/FeatureLayer",
+      "esri/dijit/FeatureTable",
+      "esri/geometry/webMercatorUtils",
+      "esri/map",
+	  "esri/graphic",
+	  "esri/symbols/SimpleLineSymbol",
+      "esri/symbols/SimpleFillSymbol",
+      "esri/symbols/TextSymbol",
+      "esri/renderers/SimpleRenderer",
+      "esri/layers/LabelClass",
+	   "esri/InfoTemplate",
+      "esri/Color",
+	  "esri/tasks/query",
+	  "esri/symbols/PictureMarkerSymbol", 
+	  "esri/tasks/QueryTask",
+	  "esri/tasks/query",
+      "dojo/dom-construct",
+      "dojo/dom",
+      "dojo/parser",
+      "dojo/ready",
+      "dojo/on",
+      "dojo/_base/lang",
+      "dijit/registry",
+      "dijit/form/Button",
+      "dijit/layout/ContentPane",
+      "dijit/layout/BorderContainer",
+      "dijit/form/TextBox"
+    ], function (
+      FeatureLayer, FeatureTable, webMercatorUtils, Map, Graphic, SimpleLineSymbol, SimpleFillSymbol, 
+      TextSymbol, SimpleRenderer, LabelClass, InfoTemplate, Color, Query,PictureMarkerSymbol,QueryTask, Query,
+      domConstruct, dom, parser, ready, on,lang,
+      registry, Button, ContentPane, BorderContainer, TextBox
+    ) {
+      parser.parse();
+
+      ready(function(){
+	
+        var myFeatureLayer;
+		var selectionSymbol;
+		
+        var map = new Map("map",{
+          basemap: "hybrid",
+		  center: [-93.7899, 42.8119],
+		 zoom: 5,
+		 showLabels: true
+        });
+
+		infoTemplate = new InfoTemplate("${Name}","Confirmed:${Confirmed}");
+		
+		myFeatureLayer = new FeatureLayer("https://services.arcgis.com/vPD5PVLI6sfkZ5E4/ArcGIS/rest/services/IA_COVID19_Cases/FeatureServer/0", {
+            mode: FeatureLayer.MODE_ONDEMAND,
+            visible: true,
+			supportsAdvancedQueries: true,
+			infoTemplate: infoTemplate,
+             outFields: ["Name",  "Confirmed", "Deaths","Recovered", "last_updated"],
+            id: "fLayer"
+          });
+		  
+        map.on("load", loadTable);
+		
+		queryTask = new QueryTask("https://services.arcgis.com/vPD5PVLI6sfkZ5E4/ArcGIS/rest/services/IA_COVID19_Cases/FeatureServer/0");
+		query = new Query();
+		query.returnGeometry = true;
+		//query.outSpatialReference = new SpatialReference(102100);
+		query.outFields =["Name","Confirmed"];
+		var q = "Confirmed > 0";
+		query.where = q;
+		queryTask.execute(query,showResult);
+		
+		function showResult(featureSet){
+			var returnedFeatures = featureSet.features;
+			let total = 0; 
+			for (var i =0; i<returnedFeatures.length; i++){
+				total += returnedFeatures[i].attributes["Confirmed"]; 
+			}
+			//alert(returnedFeatures.length + ", "+ total + ", "+ Date(Date.now()).toString()); 
+			document.getElementById("total").innerHTML = returnedFeatures.length+" counties has reported cases, with a total of <b>"+ total +"</b>";
+			document.getElementById("date").innerHTML = "Updated time: "+Date(Date.now()).toString();
+			document.getElementById("total1").innerHTML = returnedFeatures.length+" counties has reported cases, with a total of <b>"+ total +"</b>"+
+				";   Updated time: "+Date(Date.now()).toString();;			
+		}
+		
+		//myFeatureLayer.on("mouse-over", showInfowindow);
+		//myFeatureLayer.on("mouse-out", hideInfowindow);
+			
+		function showInfowindow (evt){
+				//map.graphics.clear();
+				var graphic = new Graphic(evt.graphic.geometry, selectionSymbol);
+				//Add graphic to the map graphics layer.
+				map.graphics.add(graphic);
+				//Set the infoTemplate.
+				map.infoWindow.setTitle(evt.graphic.getTitle());
+				map.infoWindow.setContent(evt.graphic.getContent());
+				//Show the infoWIndow at screenpoint
+				map.infoWindow.show(evt.screenPoint, map.getInfoWindowAnchor(evt.screenPoint));
+				
+		}
+        function loadTable(){
+          // Create the feature layer
+          
+
+          //set map extent
+          on(myFeatureLayer, "load", function(evt){
+            var extent = myFeatureLayer.fullExtent;
+            if (webMercatorUtils.canProject(extent, map)) {
+              map.setExtent( webMercatorUtils.project(extent, map) );
+            }
+          });
+		  
+		  // set a selection symbol for the featurelayer
+          //var selectionSymbol = new PictureMarkerSymbol("https://sampleserver6.arcgisonline.com/arcgis/rest/services/RedlandsEmergencyVehicles/FeatureServer/1/images/3540cfc7a09a7bd66f9b7b2114d24eee", 48 ,48);
+           selectionSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+			new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT,
+			new Color([255,0,0]), 2),new Color([255,255,0,0.25])
+		  );
+          myFeatureLayer.setSelectionSymbol(selectionSymbol);
+		  
+		   myFeatureLayer.on("click", function(evt) {
+		   //showInfowindow(); 
+            var idProperty = myFeatureLayer.objectIdField,
+              feature,
+              featureId,
+              query;
+ 
+            if (evt.graphic && evt.graphic.attributes && evt.graphic.attributes[idProperty]) {
+              feature = evt.graphic,
+              featureId = feature.attributes[idProperty];
+ 
+              query = new Query();
+              query.returnGeometry = false;
+              query.objectIds = [featureId];
+              query.where = "1=1";
+ 
+              myFeatureLayer.selectFeatures(query, FeatureLayer.SELECTION_NEW);
+			   map.centerAndZoom(feature.geometry, 12);
+            }
+          });
+
+	///////////////////////////////////////
+		var countyColor = new Color("#FFF");
+        //var countyLine = new SimpleLineSymbol("solid", countyColor, 1.5);
+        //var countySymbol = new SimpleFillSymbol("solid", countyLine, null);
+        //var countyRenderer = new SimpleRenderer(countySymbol);
+		
+		//myFeatureLayer.setRenderer(countyRenderer);
+		
+		// create a text symbol to define the style of labels
+        var countyLabel = new TextSymbol().setColor(countyColor);
+        countyLabel.font.setSize("16pt");
+        countyLabel.font.setFamily("arial");		
+		
+        //this is the very least of what should be set within the JSON  
+        var json = {
+          "labelExpressionInfo": {"value": "{Confirmed}"}
+        };
+
+		var labelClass = new LabelClass(json);
+        labelClass.symbol = countyLabel; // symbol also can be set in LabelClass' json
+        myFeatureLayer.setLabelingInfo([ labelClass ]);
+	
+	///////////////////////////////////////
+
+          map.addLayer(myFeatureLayer);
+
+          myFeatureTable = new FeatureTable({
+			"title": "Iowa Corona Virus Report by County",
+            "featureLayer" : myFeatureLayer,
+			syncSelection: true,
+			
+			zoomToSelection: true,
+			gridOptions: {
+			 sort: {
+			   field: "Confirmed", descending: true}		 
+			},
+            "outFields": [
+              "Name", "Confirmed", "Deaths", "Recovered", "last_updated"
+            ],
+            fieldInfos: [
+              {
+                name: 'Name ', 
+                alias: 'County Name ', 
+              },
+              {
+                name: 'Confirmed', 
+                alias: 'Confirmed',
+              },
+              {
+                name: 'Deaths', 
+                alias: 'Deaths',
+              },
+			  {
+                name: 'Recovered', 
+                alias: 'Recovered'
+              }
+            ],
+            "map" : map
+          }, 'myTableNode');
+
+		  //myFeatureTable.sort("Confirmed", true);
+          myFeatureTable.startup();
+		  
+
+          on(myFeatureTable, "load", function(evt){
+            console.log("The load event - ", evt);
+			myFeatureTable.grid.set('sort', [{ attribute: "<Confirmed>" }]);
+          });
+
+          myFeatureTable.on("show-statistics", function(evt){
+            console.log("show-statistics avgfield - ", evt.statistics.avgField);
+            console.log("show-statistics countfield - ", evt.statistics.countField);
+            console.log("show-statistics maxfield - ", evt.statistics.maxField);
+            console.log("show-statistics minfield - ", evt.statistics.minField);
+            console.log("show-statistics stddevfield - ", evt.statistics.stddevField);
+            console.log("show-statistics sumfield - ", evt.statistics.sumField)
+          });
+
+          myFeatureTable.on("row-select", function(evt){
+            console.log("select event - ", evt.rows[0].data);
+          });
+
+          myFeatureTable.on("row-deselect", function(evt){
+            console.log("deselect event - ", evt.rows[0].data);
+          });
+
+          myFeatureTable.on("refresh", function(evt){
+            console.log("refresh event - ", evt);
+          });
+
+          myFeatureTable.on("column-resize", function(evt){
+            //triggered by ColumnResizer extension
+            console.log("column-resize event- ", evt);
+          });
+
+          myFeatureTable.on("column-state-change", function(evt){
+            // triggered by ColumnHider extension
+            console.log("column-state-change event - ", evt);
+          });
+
+          myFeatureTable.on("sort", function(evt){
+            console.log("sort event - ", evt);
+          });
+
+          myFeatureTable.on("filter", function(evt){
+            console.log("filter event - ", evt);
+          });
+        }
+      });
+    });
+  </script>
+</head>
+
+<body class="claro esri">
+<div class= "header">
+	<h2> COVID-19 Status by County In Iowa</h2>
+	<h3 id="total"></h3><span id="date"></span> 
+</div>
+  <div data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="design:'headline'" style="width:100%; height:100%;">
+    <div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center', splitter:true" style="width:75%">
+      <div id="map"></div>
+    </div>
+	
+    <div id="bot" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'left', splitter:true" style="width:25%">  
+		<div id="myTableNode">
+		</div>	
+    </div> 
+  </div>
+  <div class= "footer">
+	
+	<span id="total1"></span><span id="date1"></span> 
+</div>
+</body>
+</html>

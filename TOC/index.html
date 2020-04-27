@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <!--The viewport meta tag is used to improve the presentation and behavior of the samples
+        on iOS devices-->
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+        <title>JS TreeClient</title>
+        <style type="text/css">
+            @import "http://serverapi.arcgisonline.com/jsapi/arcgis/2.2/js/dojo/dijit/themes/claro/claro.css";
+            @import "styles/main.css";
+			@import "./js/tmpdir/themes/claro/tmpdir.css";
+        </style>
+        <script type="text/javascript">
+            var djConfig = {
+                parseOnLoad: true,
+                baseUrl: "./",
+                modulePaths: {
+                    tmpdir: "./js/tmpdir"
+                }
+            };
+        </script>
+        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.2">
+        </script>
+        <script type="text/javascript" src="js/worldgrouped.js">
+        </script>
+        <script type="text/javascript">
+            dojo.require("dijit.dijit"); // optimize: load dijit layer
+            dojo.require("dijit.layout.BorderContainer");
+            dojo.require("dijit.layout.ContentPane");
+            dojo.require("esri.map");
+            dojo.require("dijit.layout.TabContainer");
+            dojo.require("esri.dijit.Legend");
+            /* CheckBoxTree requirements */
+            dojo.require("dojo.data.ItemFileWriteStore");
+            dojo.require("tmpdir.CheckBoxTree");
+            
+            var map;
+			var worldgroupedService;
+            function init(){
+                var initialExtent = new esri.geometry.Extent({
+                    "xmin": -86.0048268068411,
+                    "ymin": 37.8574023219202,
+                    "xmax": -85.3519594134637,
+                    "ymax": 38.5102697152975,
+                    "spatialReference": {
+                        "wkid": 4326
+                    }
+                });
+                map = new esri.Map("map", {
+                    extent: initialExtent
+                });
+                dojo.connect(map, 'onLoad', function(map){
+                    dojo.connect(dijit.byId('map'), 'resize', resizeMap);
+                });
+                
+                var worldgroupedUrl = "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyHazardsandRisks/MapServer";
+				worldgroupedService = new esri.layers.ArcGISDynamicMapServiceLayer(worldgroupedUrl);
+                
+                dojo.connect(map, 'onLayersAddResult', function(results){
+                    //add the legend 
+                    var legend = new esri.dijit.Legend({
+                        map: map,
+                        layerInfos: [{
+                            layer: worldgroupedService,
+                            title: "WorldGrouped"
+                        }],
+                        arrangement: esri.dijit.Legend.ALIGN_RIGHT
+                    }, "legendDiv");
+                    legend.startup();
+                });
+                
+                // map.addLayer(basemap);
+                map.addLayer(worldgroupedService);
+                
+                // init Tree
+                initWorldGroupedTree();
+            }
+            
+            function resizeMap(){
+                //resize the map when the browser resizes - view the 'Resizing and repositioning the map' section in 
+                //the following help topic for more details http://help.esri.com/EN/webapi/javascript/arcgis/help/jshelp_start.htm#jshelp/inside_faq.htm
+                var resizeTimer;
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function(){
+                    map.resize();
+                    map.reposition();
+                }, 500);
+            }
+            
+            //show map on load 
+            dojo.addOnLoad(init);
+        </script>
+    </head>
+    <body class="claro">
+        <div id="mainWindow" dojotype="dijit.layout.BorderContainer" design="headline" gutters="false" style="width:100%; height:100%;">
+            <div id="header" dojotype="dijit.layout.ContentPane" region="top">
+                This is the header section
+                <div id="subheader">
+                    subheader
+                </div>
+            </div>
+            <div dojotype="dijit.layout.ContentPane" id="leftPane" region="left">
+                <div dojotype="dijit.layout.TabContainer">
+                    <div dojotype="dijit.layout.ContentPane" title="Legend">
+                        <div id="legendDiv">
+                        </div>
+                    </div>
+                    <div dojotype="dijit.layout.ContentPane" title="TOC" selected="true">
+                        <div id="worldgroupedCheckboxTree">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="map" dojotype="dijit.layout.ContentPane" region="center">
+            </div>
+            <div id="footer" dojotype="dijit.layout.ContentPane" region="bottom">
+                this is the footer section
+            </div>
+        </div>
+    </body>
+</html>

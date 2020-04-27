@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html dir="ltr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta
+        name="viewport"
+        content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>Batch Geocode</title>
+
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+        .btn {
+            border: 2px solid black;
+            background-color: white;
+            color: black;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Green */
+        .gr {
+            border-color: #4CAF50;
+            color: black;
+        }
+        /* red */
+        .rd {
+            border-color: rgb(175, 76, 162);
+            color: black;
+        }
+    </style>
+     <link rel="stylesheet" href="https://js.arcgis.com/3.30/esri/themes/calcite/dijit/calcite.css">
+     <link rel="stylesheet" href="https://js.arcgis.com/3.30/esri/themes/calcite/esri/esri.css">
+   
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
+   
+     <script src="https://js.arcgis.com/3.30/"></script>
+   <script>
+      require([
+        "esri/map",
+        "esri/dijit/Search",
+        "esri/graphic",
+        "esri/layers/FeatureLayer",
+
+        "esri/symbols/SimpleMarkerSymbol",
+        "esri/Color",
+        "esri/symbols/SimpleLineSymbol",
+
+        "dojo/domReady!"
+
+      ], 
+        function (Map, Search, Graphic, FeatureLayer,
+            SimpleMarkerSymbol,
+            Color,
+            SimpleLineSymbol,
+        ) {
+
+        var featureLayer = new FeatureLayer("https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0",{
+            outFields: ["*"]
+        }); 
+        
+        const addressArray = [
+            "3421 Industrial Ave, Riverside, CA, 92504, USA",
+            "300 New York St, Redlands, CA, 92373, USA",
+            "Cal State San Bernardino, 5500 University Pkwy, San Bernardino, CA, 92407, USA",
+            "4421 Lakewood Dr, San Bernardino, CA, 92407, USA",
+            "1 N Tippecanoe Ave, San Bernardino, CA, 92408, USA"
+        ]
+
+        const geocodeButton = document.getElementById("geocodeButton");
+        geocodeButton.onclick = function(){fetchCSV()};
+
+        const featureLayerButton = document.getElementById("featureLayerButton");
+        featureLayerButton.onclick = function(){syncEdits()};
+
+         //symbol for the point
+        var sym = new SimpleMarkerSymbol(
+            SimpleMarkerSymbol.STYLE_SQUARE, 
+            20,
+            new SimpleLineSymbol(
+            SimpleLineSymbol.STYLE_SOLID,
+            new Color([0,0,35]), 3
+            ),
+            new Color([130,0,0,1])
+        ); 
+
+         var map = new Map("map", {
+            basemap: "gray",
+            center: [-117, 34],
+            zoom: 9
+         });
+
+         var graphicsArr = [];
+
+         var search = new Search({
+         });
+         search.startup();
+
+         //attributes for sampleserver6 service used
+        var attr = {
+          "eventdate": null,
+          "eventtype": 1,
+          "rotation": null,
+          "description": "redlandsTest"
+        }
+
+        search.on("search-results", function(searchResult){
+            var geometry = searchResult.results[0][0].feature.geometry;
+
+            var graphic = new Graphic(geometry, sym, attr);
+
+            map.graphics.add(graphic);
+            graphicsArr.push(graphic);
+        });
+
+        //this code is just taking the hard-coded array from the top "addressArray"
+        //the code commented out is the actual working code for taking data from the csv file
+        // and creating an array of the data
+        function fetchCSV(){
+            // let data;
+            // $.ajax({
+            //     type:"GET",
+            //     url: "https://jbanuelos.esri.com/batchAddresses.csv", //change to path of csv hosted
+            //     dataType: "text",
+            //     success: function(response){
+            //         data = $.csv.toArrays(response);
+            //         batchGeocode(data);
+            //     }
+            // });
+            
+            //hard-coding array of addresses for testing
+            var data = addressArray;
+            batchGeocode(data);
+        }
+
+        function batchGeocode(addresses){
+             //check if there are some existing graphics
+             if (map.graphics.length > 0) {
+                map.graphics.removeAll();
+            }
+            
+            for(let i=0; i < addresses.length; i++){
+                //search.search(addresses[i][0]);
+                //hard-coded addresses
+                search.search(addresses[i]);
+            }
+        }
+
+        //applies the edits on the featurelayer by passing an array of graphics into
+        //the FeatureLayaer.applyEdits() method.
+        function syncEdits(){
+          //using the graphicsArray populated from the 'search-results' event listener
+           var graphics2 = graphicsArr;
+           featureLayer.applyEdits(graphics2, null, null);
+        }
+
+        featureLayer.on("edits-complete", function(result){
+            console.log("editsComplete ", result);
+        }, function(err){
+            console.log("failed at edits with: ", err);
+        });
+
+
+      });
+   </script>
+</head>
+
+<body class="calcite">
+   <div id="map"></div>
+   <button class="btn gr" id="geocodeButton">Geocode Addresses</button>
+   <button class="btn rd" id="featureLayerButton">Create FeatureLayer</button>
+</body>
+
+</html>

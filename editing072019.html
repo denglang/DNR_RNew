@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Edit with FeatureLayer</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/3.28/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.28/esri/css/esri.css">
+    <style>
+      html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow:hidden;
+      }
+      #map {
+        padding:1px;
+		height: 640px;
+        border:solid 2px #444;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+      }
+      #rightPane {
+        
+		border-color: coral;
+        padding: 10px;
+        width:228px;
+		position: relative;
+		top: 10px;
+		right: 10px; 
+		
+      }
+      .right {
+          position: absolute;
+          right: 0px;
+          width: 300px;
+          border: 3px solid #73AD21;
+          padding: 10px;
+      }
+      .templatePicker {
+        border: solid 2px #444;
+      }
+      .btn {
+        border: 2px solid black;
+        background-color: white;
+        color: black;
+        padding: 10px 20px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+	  
+	  .contentPane {
+		max-height: 700px !important;
+		} 
+
+
+      /* Green */
+      .stop {
+        border-color: #4CAF50;
+        color: black;
+      }
+      /*blue*/
+      .bl {
+        border-color: #003366;
+        color: black;
+      }
+      dj_ie .infowindow .window .top .right .user .content { position: relative; }
+      .dj_ie .simpleInfoWindow .content {position: relative;}
+
+      .esriAttributeInspector .atiLayerName {display:none;}
+	  
+	 
+	  .contentPane.dijitInputInner:hover{
+	  width: 20em; 
+	  type: textarea;
+		 padding-right:80px !important;  
+		margin-right:35px !important;	 
+	  }
+	   /*
+	  #dijit_form_ValidationTextBox_11:hover{
+	   height: 100px;
+		width: 350px; 
+	  }
+	  #dijit_form_ValidationTextBox_0 : hover{
+	   height: 100px;
+		width: 350px; 
+	  }
+	  #dijit_form_ValidationTextBox_1: hover{
+	   height: 100px;
+		width: 350px; 
+	  }
+	  #dijit_form_ValidationTextBox_14: hover{
+	   
+	  } 
+
+	input[type="text"]:focus {
+		background:#ccc;
+		color: #6a6f75;
+		padding-left:80px !important;  
+		margin-left:35px !important;
+		outline: none;  
+	} */
+
+    </style>
+
+    <script src="https://js.arcgis.com/3.28/"></script>
+    <script>
+      var map;
+      var editorWidget;
+      var updateFeature;
+      var attInspector;
+     var editToolbar;
+      var templatePicker;
+      var bool = false;
+      var title;
+      var drawToolbar;
+      var templatePicker;
+
+      //.esriAttributeInspector .atiButton{width:34%;}
+      require([
+        "esri/map",
+        "esri/toolbars/draw",
+        "esri/toolbars/edit",
+        "esri/graphic",
+        "esri/config",
+		"esri/geometry/webMercatorUtils", 
+        "esri/layers/FeatureLayer",
+        "esri/layers/ArcGISDynamicMapServiceLayer",
+        "esri/tasks/GeometryService",
+        "esri/dijit/editing/Editor",
+        "esri/dijit/AttributeInspector",
+        "esri/dijit/InfoWindow",
+
+        "esri/tasks/QueryTask",
+
+        "esri/symbols/SimpleMarkerSymbol",
+        "esri/symbols/SimpleLineSymbol",
+        "esri/symbols/SimpleFillSymbol",
+		 "esri/urlUtils",
+        "esri/SpatialReference",
+        "esri/layers/GraphicsLayer",
+
+        "esri/dijit/editing/TemplatePicker",
+        "esri/InfoTemplate",
+        "esri/tasks/query",
+        "dijit/form/Button",
+        "dojo/dom-construct",
+        "esri/Color",
+
+        "dojo/_base/array",
+        "dojo/_base/event",
+        "dojo/_base/lang",
+        "dojo/parser",
+        "dijit/registry",
+
+        "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
+         "dojo/domReady!"
+      ], function(
+        Map, Draw, Edit, Graphic, esriConfig, webMercatorUtils,
+        FeatureLayer, ArcGISDynamicMapServiceLayer, GeometryService,Editor,AttributeInspector,
+        InfoWindow, QueryTask,
+        SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, urlUtils, SpatialReference,
+        GraphicsLayer, TemplatePicker, InfoTemplate, Query, Button, domConstruct, Color,
+        arrayUtils, event, lang, parser, registry
+      ) {
+
+		//setup proxy, so no need to log in every time.
+		urlUtils.addProxyRule({
+		      urlPrefix: "https://testgis.iowadnr.gov/",
+		      proxyUrl: "https://dev-7.iowadnr.gov/maps/dotnet/proxy.ashx"
+		    });
+
+        map = new Map("map", {
+         basemap: "streets",
+          //center: [-85.544, 42.581], //change this to Illinois 1
+         center:[-93.456,41.7895],
+          zoom: 8
+        });
+
+        //change the infoTemplate to match the recycle
+       // 2 infoTemplate = new InfoTemplate("${member_nam}", "Name : ${member_nam}<br/>Email: <a href=mailto:${contact_em}? Subject=Hello' target='_blank'>${contact_em}</a> <br />Phone: <a href=tel:${phone_numb}>${phone_numb}</a><br>Website : <a href=${website}  target='_blank'>${website}</a>");
+        infoTemplate = new InfoTemplate("${Member_Name}", "ID : ${Member_ID}<br/>Email: <a href=mailto:${Contact_Email}? Subject=Hello' target='_blank'>${Contact_Email}</a> <br />Phone: <a href=tel:${Phone_Number}>${Phone_Number}</a><br>Website : <a href=${Website}  target='_blank'>${Website}</a>");
+		//var infoTemplate = new InfoTemplate("Schoools in CA","Name: ${Name}<br/>SchoolType: ${SchoolType}<br/>Objectid: ${OBJECTID}");
+
+        //let mapLayer =new ArcGISDynamicMapServiceLayer("https://testgis.iowadnr.gov/geospatial/rest/services/Recycle/FeatureServer");
+        //var featureLayer = new FeatureLayer("https://jbanuelos.esri.com/server/rest/services/SchoolsEditable/FeatureServer/0",
+        var featureLayer = new FeatureLayer("https://testgis.iowadnr.gov/geospatial/rest/services/Recycle/FeatureServer/0",
+		{
+          mode: FeatureLayer.MODE_SNAPSHOT,
+          outFields: ["*"],
+          id: "theFeatureLayer",
+          visible: false
+        });
+       
+       //4 change the queryTask for recycle
+        //const queryTask = new QueryTask("https://bnayak1.esri.com/server/rest/services/Jose/LangTestService/FeatureServer/0");
+        //const queryTask = new QueryTask("https://jbanuelos.esri.com/server/rest/services/SchoolsEditable/FeatureServer/0");
+		 const queryTask = new QueryTask("https://testgis.iowadnr.gov/geospatial/rest/services/Recycle/FeatureServer/0");
+        
+		var graphicsLayer = new GraphicsLayer();
+        graphicsLayer.setInfoTemplate(infoTemplate);
+		//map.addLayer(mapLayer);
+		//mapLayer.setVisibleLayers([0]);
+        map.addLayer(graphicsLayer);
+        map.addLayer(featureLayer);
+		//featureLayer.setVisibility = true; 
+
+        function displayQueryLayer(){
+          //check to make sure the featurelayer above does not exist first
+		  
+          if(map.graphicsLayerIds.length > 1){
+            for(let i = 0; i < map.graphicsLayerIds.length; i++){
+              if(map.graphicsLayerIds[i] = featureLayer.id){
+                map.removeLayer(featureLayer);
+                console.log("removed featureLayer");
+              }
+            }
+          } 
+
+          var query1 = new Query();
+          query1.returnGeometry = true;
+          query1.where = '1=1';
+          query1.outSpatialReference = new SpatialReference(102100);
+          query1.outFields = ["*"];
+
+          var symbol = new SimpleMarkerSymbol;
+          symbol.setStyle(SimpleMarkerSymbol.STYLE_SQUARE);
+          symbol.setSize(10);
+          symbol.setColor(new Color([255,0,0,0.5]));
+
+          queryTask.execute(query1, displayResults);
+
+          function displayResults(featureSet){
+            var features = featureSet.features;
+            if(features.length < 1){
+              console.log("Sorry no features to query");
+            }else{
+              for(let i = 0; i < features.length; i++){
+                let graphic = features[i];
+                graphic.setInfoTemplate(infoTemplate);
+                graphic.setSymbol(symbol);
+                if(graphic.geometry.x == "NaN" && graphic.geometry.y == "NaN"){
+                  //invalid geometry
+                  console.log("invalid graphic: ", graphic);
+                }else{
+                  graphicsLayer.add(graphic);
+                }
+              }
+            }
+          }
+        }
+
+        displayQueryLayer();
+
+        featureLayer.on('load', function(){
+          //console.log("it works!");
+
+         editToolbar = new Edit(map);
+		 
+		 //comment out the following:  it'll automatically update the featureLayer
+         //editToolbar.on("deactivate", function(evt) {
+          //  featureLayer.applyEdits(null, [evt.graphic], null);
+         // });
+
+          var layerArr = [featureLayer];
+
+          templatePicker = new TemplatePicker({
+            featureLayers: layerArr,
+            rows: "auto",
+            columns: 2,
+            grouping: true,
+            style: "height: auto; overflow: auto;"
+          }, "templatePickerDiv");
+
+          templatePicker.startup();
+
+          drawToolbar = new Draw(map);
+
+         
+          templatePicker.on("selection-change", function() {
+            if( templatePicker.getSelected() ) {
+              selectedTemplate = templatePicker.getSelected();
+            }
+            if(selectedTemplate.featureLayer.geometryType == 'esriGeometryPoint'){
+              drawToolbar.activate(Draw.POINT);
+            }
+          });
+
+          drawToolbar.on("draw-end", function(evt) {
+		  
+		  
+            console.log("draw end");
+            drawToolbar.deactivate();
+            editToolbar.deactivate();
+			var mp = webMercatorUtils.webMercatorToGeographic(evt.geometry);
+		   selectedTemplate.template.prototype.attributes.X = mp.x.toFixed(8); //evt.geometry.x; //access filed value in editor
+			selectedTemplate.template.prototype.attributes.Y = mp.y.toFixed(8); //evt.geometry.y;
+		   var newAttributes = lang.mixin({}, selectedTemplate.template.prototype.attributes);
+            //var newAttributes = lang.mixin({}, selectedTemplate.template.prototype.attributes);
+            var newGraphic = new Graphic(evt.geometry, null, newAttributes);
+            selectedTemplate.featureLayer.applyEdits([newGraphic], null, null);
+			
+			map.infoWindow.setTitle("Editing Recyle Point");
+
+			map.infoWindow.show(evt.geometry, InfoWindow.ANCHOR_UPPERRIGHT);
+			//map.infoWindow.show(evt.mapPoint, map.getInfoWindowAnchor(evt.screenPoint));
+			
+          });
+		  
+		  //////////////////////////////////////////////////////
+		  editToolbar.on("graphic-move-stop", function(evt){
+             console.log("stopped..");
+            //event.stop(evt);
+             editToolbar.refresh();
+             editToolbar.deactivate();
+           });
+
+           editToolbar.on("deactivate", function(evt){
+             //debugger;
+             
+             console.log("deactivating...");
+             if(bool){
+               var r = confirm("Are you sure you want to move point to this new location?");
+               if(r == true){
+                 featureLayer.applyEdits(null, [evt.graphic], null);
+                 featureLayer.refresh();
+				 setTimeout(function(){
+					map.infoWindow.setTitle(title);
+					map.infoWindow.show(evt.geometry, InfoWindow.ANCHOR_UPPERRIGHT);
+				 }, 0);
+               }else{
+                 console.log("point is not moved permanently");
+                 document.getElementById("editingText").innerHTML = "<p>To view popup save the moved point</p>";
+                 featureLayer.refresh();
+               }
+             }
+             
+             //evt.preventDefault();;
+             //featureLayer.applyEdits(null, [evt.graphic], null);
+           });
+		  // d//////////////////////////////////////////
+        });
+
+        //5 change this to match the recycle
+          var layerInfos = [
+            {
+              'featureLayer': featureLayer,
+              'showAttachments': false,			  
+              'isEditable': true,
+              'fieldInfos': [
+			  /*
+                {'fieldName': 'objectid', 'isEditable': true, 'label': 'id:'},
+                {'fieldName': 'Member_Name', 'isEditable': true, 'tooltip': 'business name', 'label': 'Name:'},
+                {'fieldName': 'City', 'isEditable': true, 'label': 'City:'},
+                {'fieldName': 'Website', 'isEditable': true, 'tooltip': 'website', 'label': 'website'}
+			  */
+				{'fieldName': 'Member_ID', 'isEditable': false, 'label': 'Member_ID:'},
+				{'fieldName': 'Member_Name', 'isEditable': true, 'label': 'Member_Name:'},
+				{'fieldName': 'X', 'isEditable': true, 'label': 'X:'},
+				{'fieldName': 'Y', 'isEditable': true, 'label': 'Y:'},
+				
+				{'fieldName': 'Contact_Email', 'isEditable': true, 'label': 'Contact_Email:'},
+				{'fieldName': 'Phone_Number', 'isEditable': true, 'label': 'Phone_Number:'},
+				{'fieldName': 'Website', 'isEditable': true, 'label': 'Website:'},
+				{'fieldName': 'Street', 'isEditable': true, 'label': 'Street:'},
+				{'fieldName': 'City', 'isEditable': true, 'label': 'City:'},
+				{'fieldName': 'Zip_Code', 'isEditable': true, 'label': 'Zip_Code:'},
+				{'fieldName': 'County', 'isEditable': true, 'label': 'County:'},
+				{'fieldName': 'State', 'isEditable': true, 'label': 'State:'},
+				{'fieldName': 'Status_1', 'isEditable': true, 'label': 'Status_1:'},
+				{'fieldName': 'Profile_Hours', 'isEditable': true, 'label': 'Profile_Hours:'},
+				{'fieldName': 'Construction_Demolition', 'isEditable': true, 'label': 'Construction_Demolition:'},
+				{'fieldName': 'Hazardous_Waste', 'isEditable': true, 'label': 'Hazardous_Waste:'},
+				{'fieldName': 'Organics', 'isEditable': true, 'label': 'Organics:'},
+				{'fieldName': 'Solid_Waste', 'isEditable': true, 'label': 'Solid_Waste:'},
+				{'fieldName': 'Address_Website', 'isEditable': true, 'label': 'Address_Website:'},
+				{'fieldName': 'Electronics', 'isEditable': true, 'label': 'Electronics:'}
+              ]
+            }
+          ];
+
+          var selectQuery = new Query;
+
+          featureLayer.on("click", function(evt) {
+            console.log(evt);
+            selectQuery.geometry = evt.mapPoint;
+            selectQuery.distance = 0.1;
+            selectQuery.units = "miles";
+            selectQuery.returnGeometry = true;
+			
+			console.log(featureLayer);
+			//addFeatureLayer();
+			//var saveButton = new Button({ label: "Save", class: "saveButton", id: "theSaveButton"},domConstruct.create("div"));
+            //domConstruct.place(saveButton.domNode, attInspector.deleteBtn.domNode, "first");
+			
+			/*
+			var btn = document.getElementById("theSaveButton");
+			 if (btn != null) {
+				document.getElementById("theSaveButton").innerHTML = "Save";
+				document.getElementById("theSaveButton").style.color = "black";
+				} else {
+					alert('Feature not found, refresh your page and try again.');
+					return; 
+				} */
+			//var saveButton = new Button({ label: "Save", "class": "saveButton"},domConstruct.create("div"));
+
+            featureLayer.selectFeatures(selectQuery,FeatureLayer.SELECTION_NEW,function(features){
+              if(features.length > 0){
+                updateFeature = features[0];
+                title = features[0].getLayer().name;
+                map.infoWindow.setTitle(title);
+                map.infoWindow.show(evt.screenPoint, map.getInfoWindowAnchor(evt.screenPoint));
+				
+              }else{
+                map.infoWindow.hide();
+              }
+            });
+
+            event.stop(evt);
+          });
+
+          featureLayer.on("dbl-click", function(evt) {
+		  
+           console.log("clicked...");
+           event.stop(evt);
+           map.infoWindow.hide();
+           //var editToolbar = new Edit(map);
+           if(bool){
+             editToolbar.activate(Edit.MOVE, evt.graphic);
+           }else{
+             console.log("editing is not enabled");
+           }          
+         });
+
+		initEditing();
+		
+        function initEditing() {
+
+          //Initialize Attribute Inspector
+          attInspector = new AttributeInspector({
+            layerInfos: layerInfos,
+			fieldInfo: [{'stringFieldOption': 'STRING_FIELD_OPTION_RICHTEXT'}]
+			
+          }, domConstruct.create("div"));
+
+         //attInspector.startup();
+
+          var saveButton = new Button({ label: "Save", class: "saveButton", id: "theSaveButton"},domConstruct.create("div"));
+          domConstruct.place(saveButton.domNode, attInspector.deleteBtn.domNode, "first");
+
+          try{
+            attInspector.layerInfos[0].isEditable = false;
+           }catch(e){
+            console.log("no attributes inspector");
+            //console.log(e);
+          }
+           
+          
+
+          map.infoWindow.on("hide",function(){
+            featureLayer.clearSelection();
+          });
+
+            saveButton.on("click", function() {
+              if(bool){
+                updateFeature.getLayer().applyEdits(null, [updateFeature], null);
+                document.getElementById("theSaveButton").innerHTML = "Saved";
+                document.getElementById("theSaveButton").style.color = "red";
+              }else{
+                console.log("editing session is turned off");
+              }
+            });
+
+            attInspector.on("attribute-change", function(evt) {
+              //store the updates to apply when the save button is clicked
+              updateFeature.attributes[evt.fieldName] = evt.fieldValue;
+              updateFeature.getLayer().applyEdits(null,[updateFeature], null);
+
+            });
+
+            attInspector.on("delete", function(evt) {
+              console.log(evt); 
+              if (bool){
+                  var r = confirm("Are you sure you want to delete the point?");
+                  if (r == true) {
+                    evt.feature.getLayer().applyEdits(null, null, [evt.feature]);
+                    map.infoWindow.hide();
+                  } else {
+                    console.log("not going to delete...");
+                  }    
+                } else {
+                  console.log("Editing is not enabled, click start edit to enable it"); 
+                }
+            });
+
+			
+            map.infoWindow.setContent(attInspector.domNode);
+            map.infoWindow.resize(400, 510);
+        }
+
+        document.getElementById("startButton").onclick = function() {startEditing()};
+        document.getElementById("stopButton").onclick = function() {stopEditing()};
+        
+
+        function startEditing(){
+
+          console.log("Editing has begun!");
+          bool = true;
+
+          try{
+            clearGraphics();
+			console.log(attInspector.layerInfos[0]);
+            attInspector.layerInfos[0].isEditable = true;
+			document.getElementById("editingText").innerHTML = "Editng Status: In Editing Mode."
+          }catch(e){
+            console.log("no att inspector");
+            //console.log(e);
+          }
+
+        }
+        function stopEditing(){
+          bool = false;
+          console.log("stopping......");
+		  attInspector.layerInfos[0].isEditable = false;
+         featureLayer.setVisibility(false);
+		  document.getElementById("editingText").innerHTML = "Editng Status: Not In Editing Mode."
+		  map.infoWindow.hide();
+          displayQueryLayer();
+		 // map.addLayer(graphicsLayer);
+
+        }
+
+        function clearGraphics(){
+          if(graphicsLayer.graphics.length > 0){
+            //addFeatureLayer();
+            featureLayer.setVisibility(true);
+            graphicsLayer.clear(); //clears all the graphics
+            //initEditing();
+          }
+          else{
+            console.log("no graphics to clear");
+          }
+        }
+
+        function addFeatureLayer(){
+          var layerExists = false;
+          for(let i = 0; i < map.layerIds.length; i++){
+            if (map.layerIds[i] == "theFeatureLayer"){
+              //looking for the layer id assigned to the feature layer when initialized
+              //layer already exists
+              layerExists = true;
+            }
+          }
+          if(!layerExists){
+            map.addLayers([featureLayer]);
+          }
+        }
+
+      });
+    </script>
+  </head>
+  <body class="claro">
+  <div id="rightPane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'right'">
+        <div id="templatePickerDiv"></div>
+        <button class="btn start" id="startButton">Start Edit</button>
+        <button class="btn stop" id="stopButton">Stop Editing</button>
+        <div style="padding:10px;" id="editorDiv"></div>
+      </div>
+    <div data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="gutters:true, design:'headline'" style="width:100%;height:100%;">
+      <div id="map" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'"></div>
+      
+      <div id="editingText">Editing Status</div>
+
+  </body>
+</html>
